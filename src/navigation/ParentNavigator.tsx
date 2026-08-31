@@ -13,7 +13,7 @@ const Tab = createBottomTabNavigator<ParentTabParamList>();
 
 export function ParentNavigator() {
   return (
-    <ChildProvider kids={
+    <ChildProvider>
       <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveTintColor: colors.brand600 }}>
         <Tab.Screen
           name="Home"
@@ -41,7 +41,6 @@ export function ParentNavigator() {
           options={{ tabBarIcon: ({ color, size }) => <Feather name="user" color={color} size={size} /> }}
         />
       </Tab.Navigator>
-    }>
     </ChildProvider>
   );
 }

@@ -19,7 +19,7 @@ interface ChildContextValue {
 
 const ChildContext = createContext<ChildContextValue | null>(null);
 
-export function ChildProvider({ kids }: { kids: React.ReactNode }) {
+export function ChildProvider({ children }: { children: React.ReactNode }) {
   const [children, setChildren] = useState<Child[]>([]);
   const [activeChildId, setActiveChildId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,7 +65,7 @@ export function ChildProvider({ kids }: { kids: React.ReactNode }) {
     <ChildContext.Provider
       value={{ children, activeChild, loading, error, setActiveChildId: selectChild, reload }}
     >
-      {kids}
+      {children}
     </ChildContext.Provider>
   );
 }
