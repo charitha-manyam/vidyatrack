@@ -36,6 +36,8 @@ export type MoreStackParamList = {
     | { yearId?: string; yearName?: string; startDate?: string; endDate?: string }
     | undefined;
   ModulePlaceholder: { title: string };
+  ResourceList: { resourceId: string };
+  ResourceForm: { resourceId: string; itemId?: string };
   MarkAttendance: undefined;
   AttendanceReport: undefined;
   StaffDirectory: undefined;
@@ -43,11 +45,13 @@ export type MoreStackParamList = {
 };
 
 export type ParentMoreStackParamList = {
+  MoreMenu: undefined;
   Children: undefined;
   Holidays: undefined;
   Announcements: undefined;
   Marks: undefined;
   Timetable: undefined;
+  Complaints: undefined;
 };
 
 export type ParentTabParamList = {

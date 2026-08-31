@@ -20,7 +20,7 @@ interface ChildContextValue {
 const ChildContext = createContext<ChildContextValue | null>(null);
 
 export function ChildProvider({ children }: { children: React.ReactNode }) {
-  const [children, setChildren] = useState<Child[]>([]);
+  const [childList, setChildList] = useState<Child[]>([]);
   const [activeChildId, setActiveChildId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ export function ChildProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     try {
       const list = await getMyChildren();
-      setChildren(list);
+      setChildList(list);
       setActiveChildId((current) => {
         if (current && list.some((c) => c.id === current)) return current;
         return list[0]?.id ?? null;
@@ -59,11 +59,11 @@ export function ChildProvider({ children }: { children: React.ReactNode }) {
     SecureStore.setItemAsync(LAST_CHILD_KEY, id).catch(() => {});
   }, []);
 
-  const activeChild = children.find((c) => c.id === activeChildId) ?? null;
+  const activeChild = childList.find((c) => c.id === activeChildId) ?? null;
 
   return (
     <ChildContext.Provider
-      value={{ children, activeChild, loading, error, setActiveChildId: selectChild, reload }}
+      value={{ children: childList, activeChild, loading, error, setActiveChildId: selectChild, reload }}
     >
       {children}
     </ChildContext.Provider>

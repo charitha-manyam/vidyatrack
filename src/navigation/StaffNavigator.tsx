@@ -19,6 +19,8 @@ import { RoleFormScreen } from "../screens/staff/RoleFormScreen";
 import { AcademicYearsScreen } from "../screens/staff/AcademicYearsScreen";
 import { AcademicYearFormScreen } from "../screens/staff/AcademicYearFormScreen";
 import { ModulePlaceholderScreen } from "../screens/staff/ModulePlaceholderScreen";
+import { ResourceListScreen } from "../screens/staff/ResourceListScreen";
+import { ResourceFormScreen } from "../screens/staff/ResourceFormScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { useAuth } from "../context/AuthContext";
 import { hasPermission, MODULES } from "../config/rbac";
@@ -93,6 +95,16 @@ function MoreNavigator() {
         name="ModulePlaceholder"
         component={ModulePlaceholderScreen}
         options={({ route }) => ({ title: route.params?.title ?? "Module" })}
+      />
+      <MoreStack.Screen
+        name="ResourceList"
+        component={ResourceListScreen}
+        options={({ route }) => ({ title: route.params.resourceId })}
+      />
+      <MoreStack.Screen
+        name="ResourceForm"
+        component={ResourceFormScreen}
+        options={{ title: "Module" }}
       />
       <MoreStack.Screen name="MarkAttendance" component={MarkAttendanceScreen} options={{ title: "Mark attendance" }} />
       <MoreStack.Screen name="AttendanceReport" component={AttendanceReportScreen} options={{ title: "Attendance alerts" }} />

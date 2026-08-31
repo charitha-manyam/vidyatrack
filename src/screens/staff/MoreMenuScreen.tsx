@@ -45,6 +45,9 @@ export function MoreMenuScreen({ navigation }: Props) {
           navigation.navigate(dest.screen);
         }
         break;
+      case "resource":
+        navigation.navigate("ResourceList", { resourceId: dest.resourceId });
+        break;
       case "placeholder":
         navigation.navigate("ModulePlaceholder", { title: item.label });
         break;

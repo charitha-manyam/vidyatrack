@@ -86,6 +86,7 @@ export type MobileDestination =
   | { kind: "classesList" }
   | { kind: "feesTab" }
   | { kind: "more"; screen: MoreScreen }
+  | { kind: "resource"; resourceId: string }
   | { kind: "placeholder" };
 
 export type MoreScreen =
@@ -105,6 +106,28 @@ const DESTINATION_MAP: Record<string, MobileDestination> = {
   "/attendance": { kind: "more", screen: "MarkAttendance" },
   "/fees/pending": { kind: "feesTab" },
   "/fees/summary": { kind: "feesTab" },
+  "/subjects": { kind: "resource", resourceId: "subjects" },
+  "/school-working-days": { kind: "resource", resourceId: "school-working-days" },
+  "/timetable": { kind: "resource", resourceId: "timetable" },
+  "/exams": { kind: "resource", resourceId: "exams" },
+  "/exams-timetable": { kind: "resource", resourceId: "exams-timetable" },
+  "/marks": { kind: "resource", resourceId: "marks" },
+  "/homework": { kind: "resource", resourceId: "homework" },
+  "/departments": { kind: "resource", resourceId: "departments" },
+  "/designations": { kind: "resource", resourceId: "designations" },
+  "/staff-attendance": { kind: "resource", resourceId: "staff-attendance" },
+  "/leaves": { kind: "resource", resourceId: "leaves" },
+  "/leave-allocations": { kind: "resource", resourceId: "leave-allocations" },
+  "/payroll": { kind: "resource", resourceId: "payroll" },
+  "/payslips": { kind: "resource", resourceId: "payslips" },
+  "/fees/heads": { kind: "resource", resourceId: "fee-heads" },
+  "/fees/structures": { kind: "resource", resourceId: "fee-structures" },
+  "/fees/assignments": { kind: "resource", resourceId: "fee-assignments" },
+  "/fees/concessions": { kind: "resource", resourceId: "concessions" },
+  "/fees/payments": { kind: "resource", resourceId: "payments" },
+  "/fees/payment-links": { kind: "resource", resourceId: "payment-links" },
+  "/transport/routes": { kind: "resource", resourceId: "transport-routes" },
+  "/transport/assignments": { kind: "resource", resourceId: "student-transport" },
 };
 
 export function resolveMobileDestination(path: string): MobileDestination {
