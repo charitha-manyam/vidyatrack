@@ -52,10 +52,10 @@ export function SchoolLoginScreen({ navigation }: Props) {
         <Text style={styles.subtitle}>For staff and parents — we'll text or email you a one-time code.</Text>
       </View>
 
-      <Input label="School code" placeholder="e.g. SCH1234" autoCapitalize="characters" value={schoolcode} onChangeText={setSchoolcode} />
+      <Input label="School code" placeholder="" autoCapitalize="characters" value={schoolcode} onChangeText={setSchoolcode} />
       <Input
         label="Email or phone number"
-        placeholder="you@example.com or 9876543210"
+        placeholder=""
         autoCapitalize="none"
         keyboardType="email-address"
         value={identifier}

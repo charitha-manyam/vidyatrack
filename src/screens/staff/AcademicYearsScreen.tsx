@@ -24,14 +24,14 @@ import type { AcademicYearFull } from "../../types/academicYear";
 type Props = NativeStackScreenProps<MoreStackParamList, "AcademicYears">;
 
 function formatDate(value: string | undefined) {
-  if (!value) return "â€”";
+  if (!value) return "-";
   const d = new Date(value);
   return Number.isNaN(d.getTime())
     ? value
     : d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
-// Port of admin-portal's features/academicYears/AcademicYearsPage â€” list
+// Port of the admin portal's academic years list.
 // years with the Active badge, set the active year, create/edit/delete.
 // Same nav gating as the web sidebar: visible only with Classes:create.
 export function AcademicYearsScreen({ navigation }: Props) {
@@ -160,7 +160,7 @@ export function AcademicYearsScreen({ navigation }: Props) {
                       {item.isActive ? <Badge tone="green">Active</Badge> : null}
                     </View>
                     <Text style={styles.subtitle}>
-                      {formatDate(item.startDate)} â€“ {formatDate(item.endDate)}
+                      {formatDate(item.startDate)} - {formatDate(item.endDate)}
                     </Text>
                   </View>
                   {!item.isActive && canWrite ? (

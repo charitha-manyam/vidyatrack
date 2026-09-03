@@ -101,8 +101,8 @@ export function MarkAttendanceScreen({ }: Props) {
       });
       Alert.alert(
         "Attendance saved",
-        `Total: ${result.total} · Present: ${result.present} · Absent: ${result.absent}${
-          result.errors?.length ? `\n${result.errors.length} row(s) failed` : ""
+        `Total: ${result.total} - Present: ${result.present} - Absent: ${result.absent}${
+          result.errors?.length ? `\n${result.errors.length} ${result.errors.length === 1 ? "row" : "rows"} failed` : ""
         }`
       );
     } catch (err) {
@@ -150,7 +150,7 @@ export function MarkAttendanceScreen({ }: Props) {
       {students.length > 0 && (
         <>
           <Text style={styles.rosterMeta}>
-            {students.length} student(s) · {presentCount} marked present · tap a name to change status
+            {students.length} students - {presentCount} marked present. Tap a name to change status.
           </Text>
           <FlatList
             data={students}

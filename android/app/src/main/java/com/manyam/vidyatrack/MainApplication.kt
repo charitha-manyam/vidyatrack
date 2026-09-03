@@ -1,4 +1,4 @@
-package com.anonymous.vidyatrack
+package com.manyam.vidyatrack
 
 import android.app.Application
 import android.content.res.Configuration

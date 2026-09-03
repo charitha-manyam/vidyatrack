@@ -106,7 +106,7 @@ export function StudentsScreen({ navigation }: Props) {
               ) : null
             }
           />
-        <SearchBar value={search} onChangeText={setSearch} placeholder="Search name, roll no, classâ€¦" />
+        <SearchBar value={search} onChangeText={setSearch} placeholder="Search name, roll number, or class" />
         <DataState loading={loading} error={error} retry={load} empty={filtered.length === 0 ? "No students found." : null}>
           <FlatList
             contentContainerStyle={styles.listContent}
@@ -115,7 +115,7 @@ export function StudentsScreen({ navigation }: Props) {
             renderItem={({ item }) => (
               <ListRow
                 title={`${item.first_name} ${item.last_name ?? ""}`.trim()}
-                subtitle={`Roll ${item.roll_number}${item.className ? ` Â· ${item.className}${item.sectionName ? `-${item.sectionName}` : ""}` : ""}`}
+                subtitle={`Roll ${item.roll_number}${item.className ? ` - ${item.className}${item.sectionName ? `-${item.sectionName}` : ""}` : ""}`}
                 meta={item.status}
                 tone={item.status === "active" ? "success" : "neutral"}
                 chevron

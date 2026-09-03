@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import { StyleSheet, Text, View, Pressable, Image } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../navigation/types";
 import { colors } from "../../theme/colors";
@@ -19,7 +19,7 @@ export function RoleSelectScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.brandMark}>
-        <Text style={styles.brandMarkText}>V</Text>
+        <Image source={require("../../../assets/android-icon-foreground.png")} style={styles.brandLogo} resizeMode="contain" />
       </View>
       <Text style={styles.title}>VidyaTrack</Text>
       <Text style={styles.subtitle}>One record. Three rooms. Every school day.</Text>
@@ -50,18 +50,20 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   brandMark: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: colors.brand600,
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    backgroundColor: "transparent",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
+    overflow: "hidden",
   },
-  brandMarkText: {
-    color: colors.white,
-    fontSize: 26,
-    fontWeight: "800",
+  brandLogo: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    backgroundColor: "transparent",
   },
   title: {
     fontSize: 24,

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1003987901530",
+    "project_id": "vidya-track",
+    "storage_bucket": "vidya-track.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1003987901530:android:05cd52dcf38552bf378c63",
+        "android_client_info": {
+          "package_name": "com.manyam.vidyatrack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBv2lyR3_Qoojo7xdRftKqh5FLPDoWFtMo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

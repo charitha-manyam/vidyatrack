@@ -19,7 +19,7 @@ import type { TenantRole } from "../../types/role";
 
 type Props = NativeStackScreenProps<MoreStackParamList, "Roles">;
 
-// Port of admin-portal's features/roles/RolesPage â€” role CRUD gated by
+// Port of the admin portal's roles page; role actions are permission-gated.
 // Roles:create / Roles:delete. Rows mirror the web table: name (+ Default
 // badge), description, permission count, staff-assigned count.
 export function RolesScreen({ navigation }: Props) {
@@ -116,10 +116,10 @@ export function RolesScreen({ navigation }: Props) {
                       {item.is_system_default ? <Badge tone="brand">Default</Badge> : null}
                     </View>
                     <Text style={styles.subtitle} numberOfLines={1}>
-                      {item.description ?? "â€”"}
+                      {item.description ?? "-"}
                     </Text>
                     <Text style={styles.counts}>
-                      {item.permissionCount ?? 0} permission(s) Â· {item.staffCount ?? 0} staff assigned
+                      {item.permissionCount ?? 0} permissions - {item.staffCount ?? 0} staff assigned
                     </Text>
                   </View>
                   {canDelete ? (

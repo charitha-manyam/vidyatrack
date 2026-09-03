@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { RefreshControl, StyleSheet, Text, View } from "react-native";
+import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import type { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { Screen } from "../../components/Screen";
@@ -19,6 +20,40 @@ import { colors } from "../../theme/colors";
 import type { StaffTabParamList } from "../../navigation/types";
 
 type Props = BottomTabScreenProps<StaffTabParamList, "Home">;
+
+type ModuleLink = {
+  title: string;
+  onPress: () => void;
+};
+
+function ModuleCard({
+  title,
+  icon,
+  links,
+}: {
+  title: string;
+  icon: keyof typeof Feather.glyphMap;
+  links: ModuleLink[];
+}) {
+  return (
+    <View style={styles.moduleCard}>
+      <View style={styles.moduleHeader}>
+        <View style={styles.moduleIcon}>
+          <Feather name={icon} size={18} color={colors.brand600} />
+        </View>
+        <View style={styles.moduleHeaderText}>
+          <Text style={styles.moduleTitle}>{title}</Text>
+          <Text style={styles.moduleCount}>{links.length} {links.length === 1 ? "item" : "items"}</Text>
+        </View>
+      </View>
+      <View style={styles.moduleLinks}>
+        {links.map((link) => (
+          <ListRow key={link.title} title={link.title} chevron onPress={link.onPress} />
+        ))}
+      </View>
+    </View>
+  );
+}
 
 function formatCurrency(value: number) {
   return `₹${new Intl.NumberFormat("en-IN").format(value)}`;
@@ -126,7 +161,7 @@ export function DashboardScreen({ navigation }: Props) {
                   <StatCard
                     label="Staff"
                     value={data.staff?.totalStaff ?? "—"}
-                    sublabel={data.staff ? `${data.staff.teacherCount} teaching · ${data.staff.nonTeachingCount} non-teaching` : undefined}
+                    sublabel={data.staff ? `${data.staff.teacherCount} teaching, ${data.staff.nonTeachingCount} non-teaching` : undefined}
                     icon="user-check"
                     tone="gray"
                     onPress={() => navigation.navigate("More", { screen: "StaffDirectory" })}
@@ -134,9 +169,9 @@ export function DashboardScreen({ navigation }: Props) {
                 )}
                 {canReadFees && (
                   <StatCard
-                    label="Pending Fees"
+                    label="Pending fees"
                     value={formatCurrency(data.pendingAmount)}
-                    sublabel={`${data.pendingStudents} student(s)`}
+                    sublabel={`${data.pendingStudents} ${data.pendingStudents === 1 ? "student" : "students"}`}
                     icon="credit-card"
                     tone={data.pendingAmount > 0 ? "red" : "green"}
                     onPress={() => navigation.navigate("Fees")}
@@ -148,7 +183,7 @@ export function DashboardScreen({ navigation }: Props) {
             {(canReadStaff || canReadFees || canReadAttendance) && (
               <BarChartCard
                 title="Action items across modules"
-                description="Things waiting on someone right now"
+                description="Items that need attention"
                 data={[
                   ...(canReadStaff ? [{ label: "Pending leaves", value: data.pendingLeaves }] : []),
                   ...(canReadFees ? [{ label: "Students with dues", value: data.pendingStudents }] : []),
@@ -159,7 +194,7 @@ export function DashboardScreen({ navigation }: Props) {
             {canReadStaff && (
               <DonutBreakdownCard
                 title="Staff breakdown"
-                description="Teaching vs non-teaching"
+                description="Teaching and non-teaching staff"
                 data={[
                   { label: "Teaching", value: data.staff?.teacherCount ?? 0, color: colors.brand600 },
                   { label: "Non-teaching", value: data.staff?.nonTeachingCount ?? 0, color: colors.brand400 },
@@ -168,25 +203,53 @@ export function DashboardScreen({ navigation }: Props) {
             )}
 
             {(canReadStudents || canReadClasses || canReadFees || canMarkAttendance || canReadAttendance || canReadRoles) && (
-              <Text style={styles.sectionTitle}>Quick access</Text>
+              <View style={styles.sectionHeading}>
+                <Text style={styles.sectionTitle}>Quick access</Text>
+                <Text style={styles.sectionDescription}>Open the areas you manage most</Text>
+              </View>
             )}
-            {canReadStudents && (
-              <ListRow title="Students" subtitle="Directory, profiles & fees" chevron onPress={() => navigation.navigate("Students", { screen: "StudentsList" })} />
+            {(canReadStudents || canReadClasses) && (
+              <ModuleCard
+                title="Academics"
+                icon="book-open"
+                links={[
+                  ...(canReadClasses
+                    ? [{ title: "Classes & sections", onPress: () => navigation.navigate("Classes", { screen: "ClassesList" }) }]
+                    : []),
+                  ...(canReadStudents
+                    ? [{ title: "Students", onPress: () => navigation.navigate("Students", { screen: "StudentsList" }) }]
+                    : []),
+                ]}
+              />
             )}
-            {canReadClasses && (
-              <ListRow title="Classes" subtitle="Classes, sections & subjects" chevron onPress={() => navigation.navigate("Classes", { screen: "ClassesList" })} />
+            {canReadStaff && (
+              <ModuleCard
+                title="People and access"
+                icon="users"
+                links={[
+                  { title: "Staff directory", onPress: () => navigation.navigate("More", { screen: "StaffDirectory" }) },
+                  ...(canReadRoles
+                    ? [{ title: "Roles & permissions", onPress: () => navigation.navigate("More", { screen: "Roles" }) }]
+                    : []),
+                ]}
+              />
+            )}
+            {(canMarkAttendance || canReadAttendance) && (
+              <ModuleCard
+                title="Attendance and leave"
+                icon="calendar"
+                links={[
+                  ...(canMarkAttendance
+                    ? [{ title: "Mark attendance", onPress: () => navigation.navigate("More", { screen: "MarkAttendance" }) }]
+                    : []),
+                  ...(canReadAttendance
+                    ? [{ title: "Attendance alerts", onPress: () => navigation.navigate("More", { screen: "AttendanceReport" }) }]
+                    : []),
+                ]}
+              />
             )}
             {canReadFees && (
-              <ListRow title="Fees" subtitle="Pending fee summary" chevron onPress={() => navigation.navigate("Fees")} />
-            )}
-            {canMarkAttendance && (
-              <ListRow title="Mark attendance" subtitle="Class · section · date roster" chevron onPress={() => navigation.navigate("More", { screen: "MarkAttendance" })} />
-            )}
-            {canReadAttendance && (
-              <ListRow title="Attendance alerts" subtitle="Absent more than 5 days" chevron onPress={() => navigation.navigate("More", { screen: "AttendanceReport" })} />
-            )}
-            {canReadRoles && (
-              <ListRow title="Roles & Permissions" subtitle="Control what each staff role can do" chevron onPress={() => navigation.navigate("More", { screen: "Roles" })} />
+              <ModuleCard title="Fees" icon="credit-card" links={[{ title: "Pending fee summary", onPress: () => navigation.navigate("Fees") }]} />
             )}
           </View>
         )}
@@ -210,5 +273,55 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.6,
     marginTop: 4,
+  },
+  sectionHeading: {
+    gap: 4,
+    marginTop: 4,
+  },
+  sectionDescription: {
+    fontSize: 13,
+    color: colors.inkFaint,
+  },
+  moduleCard: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 10,
+    padding: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.03,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1,
+    gap: 12,
+  },
+  moduleHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  moduleIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.brand50,
+  },
+  moduleHeaderText: {
+    flex: 1,
+    gap: 2,
+  },
+  moduleTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.ink,
+  },
+  moduleCount: {
+    fontSize: 12,
+    color: colors.inkGhost,
+  },
+  moduleLinks: {
+    gap: 8,
   },
 });

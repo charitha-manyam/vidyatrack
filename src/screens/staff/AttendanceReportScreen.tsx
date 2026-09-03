@@ -41,7 +41,7 @@ export function AttendanceReportScreen({ }: Props) {
     <Screen scroll={false}>
       <View style={styles.container}>
         <PageHeader title="Attendance alerts" description="Students absent more than 5 days" />
-        <DataState loading={loading} error={error} retry={load} empty={items.length === 0 ? "No chronic absentees â€” nice." : null}>
+        <DataState loading={loading} error={error} retry={load} empty={items.length === 0 ? "No chronic absentees - nice." : null}>
           <FlatList
             contentContainerStyle={styles.listContent}
             data={items}

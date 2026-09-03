@@ -14,10 +14,10 @@ import type { Session } from "../../types/auth";
 type Props = NativeStackScreenProps<AuthStackParamList, "SchoolOtp">;
 
 export function SchoolOtpScreen({ route, navigation }: Props) {
-  const { schoolcode, email, phonenumber, userId, otp: devOtp } = route.params;
+  const { schoolcode, email, phonenumber, userId } = route.params;
   const { setSession } = useAuth();
 
-  const [otp, setOtp] = useState(devOtp ?? "");
+  const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -91,9 +91,6 @@ export function SchoolOtpScreen({ route, navigation }: Props) {
         value={otp}
         onChangeText={setOtp}
       />
-      {devOtp ? (
-        <Text style={styles.devOtp}>Dev OTP (from API): {devOtp}</Text>
-      ) : null}
       {error && <Text style={styles.error}>{error}</Text>}
 
       <Button title="Verify & sign in" onPress={handleVerify} isLoading={isSubmitting} />

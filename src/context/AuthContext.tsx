@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { setAuthToken } from "../lib/apiClient";
+import { setApiBaseUrlForRole, setAuthToken } from "../lib/apiClient";
 import { clearSession, loadSession, saveSession } from "../lib/storage";
 import type { Session } from "../types/auth";
 
@@ -24,6 +24,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const raw = await loadSession();
         if (raw) {
           const parsed = JSON.parse(raw) as Session;
+          const mappedRole = parsed.type === "staff" ? "school" : parsed.type === "parent" ? "parent" : parsed.type;
+          setApiBaseUrlForRole(mappedRole as "superadmin" | "school" | "parent" | "marketing");
           setAuthToken(parsed.token);
           setSessionState(parsed);
         }
@@ -36,12 +38,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   function setSession(next: Session) {
+    const mappedRole = next.type === "staff" ? "school" : next.type === "parent" ? "parent" : next.type;
+    setApiBaseUrlForRole(mappedRole as "superadmin" | "school" | "parent" | "marketing");
     setAuthToken(next.token);
     setSessionState(next);
     saveSession(JSON.stringify(next)).catch(() => {});
   }
 
   function logout() {
+    setApiBaseUrlForRole("school");
     setAuthToken(null);
     setSessionState(null);
     clearSession().catch(() => {});

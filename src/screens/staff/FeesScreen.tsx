@@ -18,7 +18,7 @@ import type { PendingFeeSummaryItem } from "../../types/school";
 type Props = BottomTabScreenProps<StaffTabParamList, "Fees">;
 
 function formatCurrency(value: number) {
-  return `â‚¹${new Intl.NumberFormat("en-IN").format(value)}`;
+  return `Rs ${new Intl.NumberFormat("en-IN").format(value)}`;
 }
 
 export function FeesScreen({ navigation }: Props) {
@@ -60,7 +60,7 @@ export function FeesScreen({ navigation }: Props) {
             </View>
           )}
 
-          <DataState loading={loading} error={error} retry={load} empty={items.length === 0 ? "No pending fees â€” all clear." : null}>
+          <DataState loading={loading} error={error} retry={load} empty={items.length === 0 ? "No pending fees - all clear." : null}>
             <FlatList
               contentContainerStyle={styles.listContent}
               data={items}

@@ -1,4 +1,4 @@
-package com.anonymous.vidyatrack
+package com.manyam.vidyatrack
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

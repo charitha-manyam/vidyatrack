@@ -103,7 +103,7 @@ export function ClassesScreen({ navigation }: Props) {
             renderItem={({ item }) => (
               <ListRow
                 title={item.class_name}
-                subtitle={`${item.sections_count ?? 0} section(s)`}
+                subtitle={`${item.sections_count ?? 0} ${item.sections_count === 1 ? "section" : "sections"}`}
                 meta={`${item.class_strength ?? item.total_strength ?? 0} students`}
                 tone="brand"
                 chevron

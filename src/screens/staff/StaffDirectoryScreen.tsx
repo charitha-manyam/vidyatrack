@@ -64,7 +64,7 @@ export function StaffDirectoryScreen({ }: Props) {
           </View>
         )}
 
-        <SearchBar value={search} onChangeText={setSearch} placeholder="Search name, phone, emp noâ€¦" />
+        <SearchBar value={search} onChangeText={setSearch} placeholder="Search name, phone, or employee number" />
         <DataState loading={loading} error={error} retry={load} empty={filtered.length === 0 ? "No staff found." : null}>
           <FlatList
             contentContainerStyle={styles.listContent}
@@ -73,7 +73,7 @@ export function StaffDirectoryScreen({ }: Props) {
             renderItem={({ item }) => (
               <ListRow
                 title={item.name}
-                subtitle={`${item.role}${item.department?.departmentName ? ` Â· ${item.department.departmentName}` : ""} Â· ${item.phone}`}
+                subtitle={`${item.role}${item.department?.departmentName ? ` - ${item.department.departmentName}` : ""} - ${item.phone}`}
                 meta={item.status}
                 tone={item.status === "active" ? "success" : "neutral"}
               />
