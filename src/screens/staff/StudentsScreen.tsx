@@ -1,11 +1,11 @@
 ﻿import { useCallback, useMemo, useState } from "react";
-import { Alert, FlatList, StyleSheet, View } from "react-native";
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { PageHeader } from "../../components/ui/PageHeader";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Screen } from "../../components/Screen";
 import { DataState } from "../../components/DataState";
-import { ListRow } from "../../components/ListRow";
 import { SearchBar } from "../../components/SearchBar";
 import { Button } from "../../components/Button";
 import { PermissionGate, staffPermissions } from "../../components/PermissionGate";
@@ -69,19 +69,6 @@ export function StudentsScreen({ navigation }: Props) {
     ]);
   };
 
-  const rowActions = (item: Student) => {
-    const options: Array<{ text: string; style?: "cancel" | "destructive"; onPress?: () => void }> = [
-      { text: "Cancel", style: "cancel" },
-    ];
-    if (canUpdate) {
-      options.push({ text: "Edit", onPress: () => navigation.navigate("StudentForm", { studentId: item.id }) });
-    }
-    if (canDelete) {
-      options.push({ text: "Delete", style: "destructive", onPress: () => confirmDelete(item) });
-    }
-    Alert.alert(`${item.first_name} ${item.last_name ?? ""}`.trim(), undefined, options);
-  };
-
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return students;
@@ -113,15 +100,30 @@ export function StudentsScreen({ navigation }: Props) {
             data={filtered}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <ListRow
-                title={`${item.first_name} ${item.last_name ?? ""}`.trim()}
-                subtitle={`Roll ${item.roll_number}${item.className ? ` - ${item.className}${item.sectionName ? `-${item.sectionName}` : ""}` : ""}`}
-                meta={item.status}
-                tone={item.status === "active" ? "success" : "neutral"}
-                chevron
-                onPress={() => navigation.navigate("StudentDetail", { studentId: item.id })}
-                onLongPress={canUpdate || canDelete ? () => rowActions(item) : undefined}
-              />
+              <View style={styles.card}>
+                <View style={styles.cardBody}>
+                  <Text style={styles.cardTitle}>{`${item.first_name} ${item.last_name ?? ""}`.trim()}</Text>
+                  <Text style={styles.cardSubtitle}>
+                    Roll {item.roll_number}
+                    {item.className ? ` - ${item.className}${item.sectionName ? `-${item.sectionName}` : ""}` : ""}
+                  </Text>
+                  <Text style={[styles.cardStatus, { color: item.status === "active" ? colors.success : colors.inkFaint }]}>
+                    {item.status}
+                  </Text>
+                </View>
+                <View style={styles.cardActions}>
+                  {canUpdate ? (
+                    <Pressable hitSlop={10} onPress={() => navigation.navigate("StudentForm", { studentId: item.id })}>
+                      <Feather name="edit-2" size={18} color={colors.inkSoft} />
+                    </Pressable>
+                  ) : null}
+                  {canDelete ? (
+                    <Pressable hitSlop={10} onPress={() => confirmDelete(item)}>
+                      <Feather name="trash-2" size={18} color={colors.danger} />
+                    </Pressable>
+                  ) : null}
+                </View>
+              </View>
             )}
           />
         </DataState>
@@ -152,5 +154,39 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 13,
     color: colors.inkFaint,
+  },
+  card: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 12,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  cardBody: {
+    flex: 1,
+    gap: 2,
+  },
+  cardTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.ink,
+  },
+  cardSubtitle: {
+    fontSize: 13,
+    color: colors.inkFaint,
+  },
+  cardStatus: {
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "capitalize",
+    marginTop: 4,
+  },
+  cardActions: {
+    flexDirection: "row",
+    gap: 18,
+    alignItems: "center",
   },
 });

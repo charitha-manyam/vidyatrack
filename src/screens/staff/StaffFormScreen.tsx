@@ -12,24 +12,26 @@ import { useFocusEffect } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { Screen } from "../../components/Screen";
+import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { DateInput } from "../../components/DateInput";
-import { Button } from "../../components/Button";
-import {
-  createStudent,
-  getClasses,
-  getSectionsByClass,
-  getStudentById,
-  updateStudent,
-  type StudentFormValues,
-} from "../../api/school.api";
+import { useSelectOptions } from "../../hooks/useSelectOptions";
+import { getStaffById } from "../../api/school.api";
+import { apiClient } from "../../lib/apiClient";
 import { getErrorMessage } from "../../lib/errors";
-import { useAuth } from "../../context/AuthContext";
 import { colors } from "../../theme/colors";
-import type { StudentsStackParamList } from "../../navigation/types";
-import type { SchoolClass, Section } from "../../types/school";
+import type { MoreStackParamList } from "../../navigation/types";
 
-type Props = NativeStackScreenProps<StudentsStackParamList, "StudentForm">;
+type Props = NativeStackScreenProps<MoreStackParamList, "StaffForm">;
+
+type FormState = Record<string, string>;
+
+const roleOptions: Array<string | { label: string; value: string }> = [
+  "Default (Staff)",
+  "Admin",
+  "Teacher",
+  "Staff",
+];
 
 type SelectItem = string | { label: string; value: string };
 
@@ -59,7 +61,7 @@ function InlineSelect({
 
   return (
     <View style={styles.field}>
-      <Text style={styles.fieldLabel}>{label}</Text>
+      <Text style={styles.label}>{label}</Text>
       <Pressable
         style={[styles.select, open && styles.selectOpen]}
         onPress={() => setOpen((current) => !current)}
@@ -109,106 +111,51 @@ function InlineSelect({
   );
 }
 
-export function StudentFormScreen({ route, navigation }: Props) {
-  const { session } = useAuth();
-  const staffSession =
-    session && session.type === "staff" ? session : null;
-  const studentId = route.params?.studentId;
-  const isEdit = Boolean(studentId);
-
+export function StaffFormScreen({ navigation, route }: Props) {
+  const staffId = route.params?.staffId;
+  const isEdit = Boolean(staffId);
+  const [form, setForm] = useState<FormState>({
+    role: "Default (Staff)",
+    department_id: "",
+  });
+  const [driver, setDriver] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEdit);
   const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const setValue = (key: string, value: string) =>
+    setForm((current) => ({ ...current, [key]: value }));
 
-  const [classes, setClasses] = useState<SchoolClass[]>([]);
-  const [sections, setSections] = useState<Section[]>([]);
-
-  const [form, setForm] = useState<StudentFormValues>({
-    first_name: "",
-    last_name: "",
-    gender: "male",
-    roll_number: "",
-    school_code: staffSession?.schoolcode ?? "",
-    class_id: "",
-    sectionId: "",
-    admission_number: "",
-    date_of_birth: "",
-    address: "",
-    father_name: "",
-    mother_name: "",
-    father_email: "",
-    mother_email: "",
-    father_phone: "",
-    mother_phone: "",
-  });
-
-  const set = (key: keyof StudentFormValues) => (value: string) =>
-    setForm((prev) => ({ ...prev, [key]: value }));
-
-  const classOptions: SelectItem[] = useMemo(
-    () => classes.map((c) => ({ label: c.class_name, value: c.id })),
-    [classes]
-  );
-  const sectionOptions: SelectItem[] = useMemo(
-    () => sections.map((s) => ({ label: s.sectionName, value: s.id })),
-    [sections]
-  );
-  const genderOptions: SelectItem[] = [
-    { label: "Male", value: "male" },
-    { label: "Female", value: "female" },
-    { label: "Other", value: "other" },
-  ];
-
-  const pickClass = async (classId: string) => {
-    setForm((prev) => ({ ...prev, class_id: classId, sectionId: "" }));
-    try {
-      setSections(await getSectionsByClass(classId));
-    } catch {
-      setSections([]);
-    }
-  };
+  const { options } = useSelectOptions(["departments"]);
+  const departmentOptions: SelectItem[] = useMemo(() => {
+    const depts = options.departments ?? [];
+    return [{ label: "None", value: "" }, ...depts];
+  }, [options.departments]);
 
   useFocusEffect(
     useCallback(() => {
+      if (!staffId) return;
       let alive = true;
       (async () => {
         try {
           setLoading(true);
-          const classList = await getClasses();
-          if (!alive) return;
-          setClasses(classList);
-          if (studentId) {
-            const student = await getStudentById(studentId);
-            if (!alive || !student) return;
-            setForm({
-              first_name: student.first_name ?? "",
-              last_name: student.last_name ?? "",
-              gender: student.gender ?? "male",
-              roll_number: student.roll_number ?? "",
-              school_code:
-                student.school_code ?? staffSession?.schoolcode ?? "",
-              class_id: student.class_id ?? "",
-              sectionId: student.sectionId ?? "",
-              admission_number: student.admission_number ?? "",
-              date_of_birth: student.date_of_birth ?? "",
-              address: student.address ?? "",
-              father_name: "",
-              mother_name: "",
-              father_email: "",
-              mother_email: "",
-              father_phone: "",
-              mother_phone: "",
-            });
-            if (student.class_id) {
-              try {
-                setSections(
-                  await getSectionsByClass(student.class_id)
-                );
-              } catch {
-                /* noop */
-              }
-            }
-          }
+          const staff = await getStaffById(staffId);
+          if (!alive || !staff) return;
+          setForm({
+            name: staff.name ?? "",
+            phone: staff.phone ?? "",
+            email: staff.email ?? "",
+            emp_number: staff.emp_number ?? "",
+            school_code: "",
+            role: staff.role ?? "Staff",
+            department_id: staff.department?.id ?? "",
+            qualification: staff.qualification ?? "",
+            date_of_birth: staff.date_of_birth ?? "",
+            date_of_join: staff.date_of_join ?? "",
+            account_holder_name: staff.bank_account_name ?? "",
+            account_number: staff.bank_account_number ?? "",
+            ifsc_code: staff.ifsc_code ?? "",
+          });
+          setDriver(Boolean(staff.is_driver));
         } catch (err) {
           if (alive) setError(getErrorMessage(err));
         } finally {
@@ -218,32 +165,39 @@ export function StudentFormScreen({ route, navigation }: Props) {
       return () => {
         alive = false;
       };
-    }, [studentId])
+    }, [staffId])
   );
 
-  const save = async () => {
-    if (!form.first_name.trim()) {
-      setError("First name is required.");
+  async function save() {
+    if (
+      !form.name?.trim() ||
+      !form.phone?.trim() ||
+      !form.school_code?.trim()
+    ) {
+      setError("Name, phone, and school code are required.");
       return;
     }
-    if (!form.roll_number.trim()) {
-      setError("Roll number is required.");
-      return;
-    }
-    if (!form.school_code.trim()) {
-      setError("School code is required.");
-      return;
-    }
-    setError(null);
     setSaving(true);
+    setError(null);
     try {
-      if (studentId) {
-        await updateStudent(studentId, form);
+      const payload = {
+        ...form,
+        can_be_driver: driver,
+        role:
+          form.role === "Default (Staff)" ? "staff" : form.role.toLowerCase(),
+      };
+      if (isEdit && staffId) {
+        await apiClient.put(`/tenant/updatestaffById/${staffId}`, payload);
       } else {
-        await createStudent(form);
+        if (!form.email?.trim()) {
+          setError("Email is required.");
+          setSaving(false);
+          return;
+        }
+        await apiClient.post("/tenant/staff", payload);
       }
       Alert.alert(
-        isEdit ? "Student updated" : "Student added",
+        isEdit ? "Staff member updated" : "Staff member added",
         undefined,
         [{ text: "OK", onPress: () => navigation.goBack() }]
       );
@@ -252,7 +206,7 @@ export function StudentFormScreen({ route, navigation }: Props) {
     } finally {
       setSaving(false);
     }
-  };
+  }
 
   if (loading) {
     return (
@@ -271,42 +225,23 @@ export function StudentFormScreen({ route, navigation }: Props) {
         keyboardShouldPersistTaps="handled"
       >
         <Text style={styles.title}>
-          {isEdit ? "Edit student" : "Add student"}
+          {isEdit ? "Edit staff member" : "Add staff member"}
         </Text>
 
         <View style={styles.row}>
           <View style={styles.half}>
             <Input
-              label="First name"
-              value={form.first_name}
-              onChangeText={set("first_name")}
+              label="Name"
+              value={form.name ?? ""}
+              onChangeText={(v) => setValue("name", v)}
             />
           </View>
           <View style={styles.half}>
             <Input
-              label="Last name"
-              value={form.last_name}
-              onChangeText={set("last_name")}
-            />
-          </View>
-        </View>
-
-        <View style={styles.row}>
-          <View style={styles.half}>
-            <InlineSelect
-              label="Gender"
-              value={form.gender ?? ""}
-              placeholder="Select gender"
-              options={genderOptions}
-              onSelect={set("gender")}
-            />
-          </View>
-          <View style={styles.half}>
-            <Input
-              label="Roll number"
-              value={form.roll_number}
-              onChangeText={set("roll_number")}
-              keyboardType="numeric"
+              label="Phone"
+              value={form.phone ?? ""}
+              onChangeText={(v) => setValue("phone", v)}
+              keyboardType="phone-pad"
             />
           </View>
         </View>
@@ -314,112 +249,117 @@ export function StudentFormScreen({ route, navigation }: Props) {
         <View style={styles.row}>
           <View style={styles.half}>
             <Input
-              label="Admission number"
-              value={form.admission_number}
-              onChangeText={set("admission_number")}
+              label="Email"
+              value={form.email ?? ""}
+              onChangeText={(v) => setValue("email", v)}
+              keyboardType="email-address"
+              autoCapitalize="none"
             />
           </View>
           <View style={styles.half}>
             <Input
-              label="School code"
-              value={form.school_code}
-              onChangeText={set("school_code")}
-              autoCapitalize="characters"
-            />
-          </View>
-        </View>
-
-        <DateInput
-          label="Date of birth"
-          value={form.date_of_birth ?? ""}
-          onChangeDate={set("date_of_birth")}
-          placeholder="mm/dd/yyyy"
-        />
-
-        <View style={styles.row}>
-          <View style={styles.half}>
-            <InlineSelect
-              label="Class"
-              value={form.class_id ?? ""}
-              placeholder="Select class"
-              options={classOptions}
-              onSelect={pickClass}
-            />
-          </View>
-          <View style={styles.half}>
-            <InlineSelect
-              label="Section"
-              value={form.sectionId ?? ""}
-              placeholder="Select section"
-              options={sectionOptions}
-              onSelect={set("sectionId")}
+              label="Employee number"
+              value={form.emp_number ?? ""}
+              onChangeText={(v) => setValue("emp_number", v)}
             />
           </View>
         </View>
 
         <Input
-          label="Address"
-          value={form.address}
-          onChangeText={set("address")}
-          multiline
+          label="School code"
+          value={form.school_code ?? ""}
+          onChangeText={(v) => setValue("school_code", v)}
+          autoCapitalize="none"
         />
 
-        <Text style={styles.sectionTitle}>PARENT DETAILS (OPTIONAL)</Text>
+        <View style={styles.row}>
+          <View style={styles.half}>
+            <InlineSelect
+              label="Role"
+              value={form.role ?? ""}
+              placeholder="Select role"
+              options={roleOptions}
+              onSelect={(v) => setValue("role", v)}
+            />
+          </View>
+          <View style={styles.half}>
+            <InlineSelect
+              label="Department"
+              value={form.department_id ?? ""}
+              placeholder="Select department"
+              options={departmentOptions}
+              onSelect={(v) => setValue("department_id", v)}
+            />
+          </View>
+        </View>
 
         <View style={styles.row}>
           <View style={styles.half}>
             <Input
-              label="Father's name"
-              value={form.father_name}
-              onChangeText={set("father_name")}
+              label="Qualification"
+              value={form.qualification ?? ""}
+              onChangeText={(v) => setValue("qualification", v)}
             />
           </View>
           <View style={styles.half}>
-            <Input
-              label="Mother's name"
-              value={form.mother_name}
-              onChangeText={set("mother_name")}
+            <DateInput
+              label="Date of birth"
+              value={form.date_of_birth ?? ""}
+              onChangeDate={(v) => setValue("date_of_birth", v)}
+              placeholder="mm/dd/yyyy"
             />
           </View>
         </View>
+
+        <DateInput
+          label="Date of joining"
+          value={form.date_of_join ?? ""}
+          onChangeDate={(v) => setValue("date_of_join", v)}
+          placeholder="mm/dd/yyyy"
+        />
+
+        <Text style={styles.sectionTitle}>BANK DETAILS (OPTIONAL)</Text>
+
         <View style={styles.row}>
           <View style={styles.half}>
             <Input
-              label="Father's email"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              value={form.father_email}
-              onChangeText={set("father_email")}
+              label="Account holder name"
+              value={form.account_holder_name ?? ""}
+              onChangeText={(v) => setValue("account_holder_name", v)}
             />
           </View>
           <View style={styles.half}>
             <Input
-              label="Mother's email"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              value={form.mother_email}
-              onChangeText={set("mother_email")}
+              label="Account number"
+              value={form.account_number ?? ""}
+              onChangeText={(v) => setValue("account_number", v)}
+              keyboardType="numeric"
             />
           </View>
         </View>
-        <View style={styles.row}>
-          <View style={styles.half}>
-            <Input
-              label="Father's phone"
-              keyboardType="phone-pad"
-              value={form.father_phone}
-              onChangeText={set("father_phone")}
-            />
+
+        <Input
+          label="IFSC code"
+          value={form.ifsc_code ?? ""}
+          onChangeText={(v) => setValue("ifsc_code", v)}
+          autoCapitalize="characters"
+        />
+
+        <Pressable
+          style={styles.driverRow}
+          onPress={() => setDriver((current) => !current)}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: driver }}
+        >
+          <View
+            style={[styles.checkbox, driver && styles.checkboxChecked]}
+          >
+            {driver ? (
+              <Feather name="check" size={13} color={colors.white} />
+            ) : null}
           </View>
-          <View style={styles.half}>
-            <Input
-              label="Mother's phone"
-              keyboardType="phone-pad"
-              value={form.mother_phone}
-              onChangeText={set("mother_phone")}
-            />
-          </View>
-        </View>
+          <Text style={styles.driverText}>Can be assigned as a driver</Text>
+        </Pressable>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -430,7 +370,7 @@ export function StudentFormScreen({ route, navigation }: Props) {
             onPress={() => navigation.goBack()}
           />
           <Button
-            title={isEdit ? "Save changes" : "Add student"}
+            title={isEdit ? "Save changes" : "Add staff member"}
             onPress={save}
             isLoading={saving}
           />
@@ -456,7 +396,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: 12 },
   half: { flex: 1 },
   field: { gap: 6, flex: 1 },
-  fieldLabel: { fontSize: 13, fontWeight: "500", color: colors.ink },
+  label: { fontSize: 13, fontWeight: "500", color: colors.ink },
   select: {
     minHeight: 48,
     borderWidth: 1,
@@ -510,6 +450,25 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginTop: 6,
   },
+  driverRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  checkbox: {
+    width: 18,
+    height: 18,
+    borderWidth: 1,
+    borderColor: colors.lineStrong,
+    borderRadius: 3,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxChecked: {
+    backgroundColor: colors.brand600,
+    borderColor: colors.brand600,
+  },
+  driverText: { fontSize: 14, color: colors.inkSoft },
   error: { fontSize: 13, color: colors.danger },
   footer: {
     flexDirection: "row",

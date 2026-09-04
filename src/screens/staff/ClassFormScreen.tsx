@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Screen } from "../../components/Screen";
 import { Input } from "../../components/Input";
 import { Button } from "../../components/Button";
-import { PageHeader } from "../../components/ui/PageHeader";
 import { createClass, deleteClass, updateClass } from "../../api/school.api";
 import { getErrorMessage } from "../../lib/errors";
 import type { ClassesStackParamList } from "../../navigation/types";
@@ -15,6 +14,10 @@ export function ClassFormScreen({ route, navigation }: Props) {
   const editing = route.params?.classId
     ? { id: route.params.classId, className: route.params.className ?? "" }
     : null;
+
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: editing ? "Edit class" : "Add class" });
+  }, [navigation, editing]);
   const [name, setName] = useState(editing?.className ?? "");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -64,15 +67,7 @@ export function ClassFormScreen({ route, navigation }: Props) {
   };
 
   return (
-    <Screen>
-      <PageHeader
-        title={editing ? "Edit class" : "Add class"}
-        description={
-          editing
-            ? undefined
-            : "A default section is created automatically — add real sections only if this class needs more than one."
-        }
-      />
+    <Screen topInset={false}>
       <View style={styles.form}>
         <Input label="Class name" placeholder="e.g. Grade 5" value={name} onChangeText={setName} error={error ?? undefined} />
         <Button title={editing ? "Save changes" : "Create class"} onPress={save} isLoading={saving} />

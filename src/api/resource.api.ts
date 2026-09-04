@@ -6,10 +6,25 @@ import type { ResourceConfig } from "../config/resources";
 // tenant-scoped routes under /tenant, same ones the admin-portal uses.
 export async function listResource(config: ResourceConfig, studentId?: string) {
   const path = config.studentFiltered && studentId ? `${config.listPath}/${studentId}` : config.listPath;
-  const { data } = await apiClient.get<ApiResponse<Record<string, unknown>[]>>(path);
-  const payload = data.data;
-  if (Array.isArray(payload)) return payload;
-  if (payload && typeof payload === "object") return [payload as Record<string, unknown>];
+  const { data: responseBody } = await apiClient.get<ApiResponse<Record<string, unknown>[]> | Record<string, unknown>[]>(path);
+  const preferredKeys = ["items", "rows", "results", "schoolWorkingDays", "workingDays", "school_working_days", "data"];
+  function findRows(payload: unknown): Record<string, unknown>[] | null {
+    if (Array.isArray(payload)) return payload as Record<string, unknown>[];
+    if (!payload || typeof payload !== "object") return null;
+    const record = payload as Record<string, unknown>;
+    for (const key of preferredKeys) {
+      const rows = findRows(record[key]);
+      if (rows) return rows;
+    }
+    for (const child of Object.values(record)) {
+      const rows = findRows(child);
+      if (rows) return rows;
+    }
+    return null;
+  }
+  const rows = findRows(responseBody);
+  if (rows) return rows;
+  if (responseBody && typeof responseBody === "object" && !Array.isArray(responseBody)) return [responseBody as unknown as Record<string, unknown>];
   return [];
 }
 

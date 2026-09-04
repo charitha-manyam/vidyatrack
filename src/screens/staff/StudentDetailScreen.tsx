@@ -72,7 +72,7 @@ export function StudentDetailScreen({ route }: Props) {
                 {student.sectionName ? ` · Section ${student.sectionName}` : ""} · Roll {student.roll_number}
               </Text>
               <Text style={[styles.badge, { color: student.status === "active" ? colors.success : colors.inkFaint }]}>
-                {student.status.toUpperCase()}
+                {(student.status ?? "active").toUpperCase()}
               </Text>
             </Card>
 

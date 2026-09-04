@@ -1,12 +1,11 @@
 ﻿import { useCallback, useState } from "react";
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, FlatList, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Screen } from "../../components/Screen";
 import { DataState } from "../../components/DataState";
 import { Button } from "../../components/Button";
-import { PageHeader } from "../../components/ui/PageHeader";
 import { Badge } from "../../components/ui/Badge";
 import { PermissionGate, staffPermissions } from "../../components/PermissionGate";
 import { useAuth } from "../../context/AuthContext";
@@ -22,6 +21,8 @@ import type { MoreStackParamList } from "../../navigation/types";
 import type { AcademicYearFull } from "../../types/academicYear";
 
 type Props = NativeStackScreenProps<MoreStackParamList, "AcademicYears">;
+
+const carryForwardModules = ["Classes", "Sections", "Subjects", "Fee heads", "Fee structures", "Concessions", "Student fee assignments", "Payroll", "Exam types", "Exam schedules", "Transport routes", "Departments", "Subject assignments"];
 
 function formatDate(value: string | undefined) {
   if (!value) return "-";
@@ -43,6 +44,9 @@ export function AcademicYearsScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectingId, setSelectingId] = useState<string | null>(null);
+  const [carryForwardVisible, setCarryForwardVisible] = useState(false);
+  const [carryTarget, setCarryTarget] = useState("");
+  const [modules, setModules] = useState<string[]>(carryForwardModules);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -122,17 +126,16 @@ export function AcademicYearsScreen({ navigation }: Props) {
 
   return (
     <PermissionGate module={MODULES.CLASSES} action="create">
-      <Screen scroll={false}>
+      <Screen scroll={false} topInset={false}>
         <View style={styles.container}>
-          <PageHeader
-            title="Academic Years"
-            description="Manage academic years and pick the active one."
-            actions={
-              canWrite ? (
-                <Button title="+ Add year" onPress={() => navigation.navigate("AcademicYearForm", undefined)} />
-              ) : null
-            }
-          />
+          {canWrite ? (
+            <View style={styles.actions}>
+              <Button variant="secondary" title="Promote students" onPress={() => navigation.navigate("AcademicYearPromotion", { kind: "students" })} style={styles.actionButton} />
+              <Button variant="secondary" title="Promote staff" onPress={() => navigation.navigate("AcademicYearPromotion", { kind: "staff" })} style={styles.actionButton} />
+              <Button variant="secondary" title="Carry forward" onPress={() => setCarryForwardVisible(true)} style={styles.actionButton} />
+              <Button title="Add year" onPress={() => navigation.navigate("AcademicYearForm", undefined)} style={styles.actionButton} />
+            </View>
+          ) : null}
           <DataState loading={loading} error={error} retry={load} empty={years.length === 0 ? "No academic years yet." : null}>
             <FlatList
               contentContainerStyle={styles.listContent}
@@ -188,6 +191,48 @@ export function AcademicYearsScreen({ navigation }: Props) {
             />
           </DataState>
         </View>
+        <Modal visible={carryForwardVisible} transparent animationType="fade" onRequestClose={() => setCarryForwardVisible(false)}>
+          <View style={styles.modalBackdrop}>
+            <View style={styles.modalCard}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Carry forward to a new academic year</Text>
+                <Pressable onPress={() => setCarryForwardVisible(false)} hitSlop={10}>
+                  <Feather name="x" size={22} color={colors.inkFaint} />
+                </Pressable>
+              </View>
+              <Text style={styles.modalDescription}>Copies data from the immediately previous year into the one you pick. Students and staff are handled separately through promotion decisions.</Text>
+              <Text style={styles.modalLabel}>Carry forward into</Text>
+              <Pressable style={styles.select} onPress={() => {
+                const availableYears = years.filter((year) => !year.isActive);
+                if (availableYears.length === 0) {
+                  Alert.alert("No target year", "Create another academic year before carrying data forward.");
+                  return;
+                }
+                Alert.alert("Select target year", undefined, [
+                  ...availableYears.map((year) => ({ text: year.yearName, onPress: () => setCarryTarget(year.id) })),
+                  { text: "Cancel", style: "cancel" },
+                ]);
+              }}>
+                <Text style={carryTarget ? styles.selectText : styles.placeholder}>{carryTarget ? years.find((year) => year.id === carryTarget)?.yearName ?? "Target academic year" : "Select target year"}</Text>
+                <Feather name="chevron-down" size={18} color={colors.inkFaint} />
+              </Pressable>
+              <Text style={styles.modalLabel}>Modules to carry forward</Text>
+              <View style={styles.moduleGrid}>
+                {carryForwardModules.map((module) => {
+                  const selected = modules.includes(module);
+                  return <Pressable key={module} style={styles.moduleOption} onPress={() => setModules((current) => selected ? current.filter((item) => item !== module) : [...current, module])}>
+                    <View style={[styles.checkbox, selected && styles.checkboxSelected]}>{selected ? <Feather name="check" size={13} color={colors.white} /> : null}</View>
+                    <Text style={styles.moduleText}>{module}</Text>
+                  </Pressable>;
+                })}
+              </View>
+              <View style={styles.modalFooter}>
+                <Button variant="secondary" title="Cancel" onPress={() => setCarryForwardVisible(false)} />
+                <Button title="Preview" disabled={!carryTarget || modules.length === 0} onPress={() => Alert.alert("Preview unavailable", "Carry-forward preview will be connected when the server operation is enabled.")} />
+              </View>
+            </View>
+          </View>
+        </Modal>
       </Screen>
     </PermissionGate>
   );
@@ -196,8 +241,16 @@ export function AcademicYearsScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 16,
     gap: 12,
+  },
+  actions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  actionButton: {
+    flexGrow: 1,
   },
   listContent: {
     gap: 8,
@@ -245,4 +298,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.inkFaint,
   },
+  modalBackdrop: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(20, 36, 33, 0.45)" },
+  modalCard: { backgroundColor: colors.white, borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 20, gap: 12 },
+  modalHeader: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 12 },
+  modalTitle: { flex: 1, fontSize: 19, fontWeight: "700", color: colors.ink },
+  modalDescription: { fontSize: 13, lineHeight: 19, color: colors.inkFaint },
+  modalLabel: { fontSize: 14, fontWeight: "600", color: colors.ink, marginTop: 4 },
+  select: { minHeight: 50, borderWidth: 1, borderColor: colors.lineStrong, borderRadius: 10, paddingHorizontal: 14, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  selectText: { fontSize: 15, color: colors.ink },
+  placeholder: { fontSize: 15, color: colors.inkFaint },
+  moduleGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  moduleOption: { width: "48%", flexDirection: "row", alignItems: "center", gap: 8 },
+  checkbox: { width: 18, height: 18, borderWidth: 1, borderColor: colors.lineStrong, borderRadius: 4, alignItems: "center", justifyContent: "center" },
+  checkboxSelected: { backgroundColor: colors.brand600, borderColor: colors.brand600 },
+  moduleText: { flex: 1, fontSize: 13, color: colors.inkSoft },
+  modalFooter: { flexDirection: "row", justifyContent: "flex-end", gap: 8, marginTop: 8 },
 });

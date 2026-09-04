@@ -67,7 +67,20 @@ export interface StaffMember {
   status: "active" | "inactive" | "resigned" | "transferred";
   department?: { id: string; departmentName: string } | null;
   image?: string | null;
+  date_of_birth?: string | null;
   date_of_join?: string | null;
+  school_code?: string;
+  department_id?: string | null;
+  bank_account_name?: string | null;
+  bank_account_number?: string | null;
+  ifsc_code?: string | null;
+  is_driver?: boolean;
+  license_number?: string | null;
+  license_expiry?: string | null;
+  leave_balance?: number | null;
+  leavesBalance?: number | null;
+  leavesTaken?: number | null;
+  leavesPending?: number | null;
 }
 
 export interface StaffStats {

@@ -13,11 +13,13 @@ import { FeesScreen } from "../screens/staff/FeesScreen";
 import { MarkAttendanceScreen } from "../screens/staff/MarkAttendanceScreen";
 import { AttendanceReportScreen } from "../screens/staff/AttendanceReportScreen";
 import { StaffDirectoryScreen } from "../screens/staff/StaffDirectoryScreen";
+import { StaffFormScreen } from "../screens/staff/StaffFormScreen";
 import { MoreMenuScreen } from "../screens/staff/MoreMenuScreen";
 import { RolesScreen } from "../screens/staff/RolesScreen";
 import { RoleFormScreen } from "../screens/staff/RoleFormScreen";
 import { AcademicYearsScreen } from "../screens/staff/AcademicYearsScreen";
 import { AcademicYearFormScreen } from "../screens/staff/AcademicYearFormScreen";
+import { AcademicYearPromotionScreen } from "../screens/staff/AcademicYearPromotionScreen";
 import { ModulePlaceholderScreen } from "../screens/staff/ModulePlaceholderScreen";
 import { ResourceListScreen } from "../screens/staff/ResourceListScreen";
 import { ResourceFormScreen } from "../screens/staff/ResourceFormScreen";
@@ -38,6 +40,14 @@ const StudentsStack = createNativeStackNavigator<StudentsStackParamList>();
 const ClassesStack = createNativeStackNavigator<ClassesStackParamList>();
 const MoreStack = createNativeStackNavigator<MoreStackParamList>();
 
+const headerOptions = {
+  headerStyle: { backgroundColor: colors.white },
+  headerTintColor: colors.ink,
+  headerTitleStyle: { color: colors.ink, fontWeight: "600" as const },
+  headerShadowVisible: false,
+  headerBackTitleVisible: false,
+};
+
 function StudentsNavigator() {
   return (
     <StudentsStack.Navigator screenOptions={{ headerShown: false }}>
@@ -46,7 +56,7 @@ function StudentsNavigator() {
       <StudentsStack.Screen
         name="StudentForm"
         component={StudentFormScreen}
-        options={{ headerShown: true, title: "Student", headerTitleStyle: { color: colors.ink } }}
+        options={{ headerShown: true, title: "Add student", ...headerOptions }}
       />
     </StudentsStack.Navigator>
   );
@@ -60,12 +70,12 @@ function ClassesNavigator() {
       <ClassesStack.Screen
         name="ClassForm"
         component={ClassFormScreen}
-        options={{ headerShown: true, title: "Class", headerTitleStyle: { color: colors.ink } }}
+        options={{ headerShown: true, title: "Class", ...headerOptions }}
       />
       <ClassesStack.Screen
         name="SectionForm"
         component={SectionFormScreen}
-        options={{ headerShown: true, title: "Section", headerTitleStyle: { color: colors.ink } }}
+        options={{ headerShown: true, title: "Section", ...headerOptions }}
       />
     </ClassesStack.Navigator>
   );
@@ -73,13 +83,13 @@ function ClassesNavigator() {
 
 function MoreNavigator() {
   return (
-    <MoreStack.Navigator screenOptions={{ headerShown: true, headerTitleStyle: { color: colors.ink } }}>
+    <MoreStack.Navigator screenOptions={{ headerShown: true, ...headerOptions }}>
       <MoreStack.Screen name="MoreMenu" component={MoreMenuScreen} options={{ headerShown: false }} />
       <MoreStack.Screen name="Roles" component={RolesScreen} options={{ title: "Roles & Permissions" }} />
       <MoreStack.Screen
         name="RoleForm"
         component={RoleFormScreen}
-        options={{ title: "Role", headerTitleStyle: { color: colors.ink } }}
+        options={{ title: "Role" }}
       />
       <MoreStack.Screen
         name="AcademicYears"
@@ -89,7 +99,12 @@ function MoreNavigator() {
       <MoreStack.Screen
         name="AcademicYearForm"
         component={AcademicYearFormScreen}
-        options={({ route }) => ({ title: route.params?.yearId ? "Edit year" : "Add year", headerTitleStyle: { color: colors.ink } })}
+        options={({ route }) => ({ title: route.params?.yearId ? "Edit year" : "Add year" })}
+      />
+      <MoreStack.Screen
+        name="AcademicYearPromotion"
+        component={AcademicYearPromotionScreen}
+        options={({ route }) => ({ title: route.params.kind === "students" ? "Promote students" : "Promote staff" })}
       />
       <MoreStack.Screen
         name="ModulePlaceholder"
@@ -109,6 +124,7 @@ function MoreNavigator() {
       <MoreStack.Screen name="MarkAttendance" component={MarkAttendanceScreen} options={{ title: "Mark attendance" }} />
       <MoreStack.Screen name="AttendanceReport" component={AttendanceReportScreen} options={{ title: "Attendance alerts" }} />
       <MoreStack.Screen name="StaffDirectory" component={StaffDirectoryScreen} options={{ title: "Staff directory" }} />
+      <MoreStack.Screen name="StaffForm" component={StaffFormScreen} options={{ title: "Add staff member" }} />
       <MoreStack.Screen name="Profile" component={ProfileScreen} options={{ title: "Profile" }} />
     </MoreStack.Navigator>
   );

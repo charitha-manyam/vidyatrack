@@ -3,7 +3,6 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Screen } from "../../components/Screen";
 import { DataState } from "../../components/DataState";
 import { ListRow } from "../../components/ListRow";
-import { PageHeader } from "../../components/ui/PageHeader";
 import { useActiveChild } from "../../context/ChildContext";
 import type { ParentMoreStackParamList } from "../../navigation/types";
 
@@ -13,9 +12,8 @@ export function ParentChildrenScreen({ navigation }: Props) {
   const { children, activeChild, loading, error, setActiveChildId, reload } = useActiveChild();
 
   return (
-    <Screen scroll={false}>
+    <Screen scroll={false} topInset={false}>
       <View style={styles.container}>
-        <PageHeader title="Children" description="Choose which child to view." />
         <DataState loading={loading} error={error} retry={reload} empty={children.length === 0 ? "No children linked yet." : null}>
           <FlatList
             data={children}

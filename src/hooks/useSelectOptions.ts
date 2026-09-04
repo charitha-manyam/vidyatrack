@@ -13,7 +13,8 @@ export type OptionSource =
   | "subjects"
   | "exams"
   | "feeHeads"
-  | "vehicles";
+  | "vehicles"
+  | "departments";
 
 const ENDPOINTS: Record<OptionSource, string> = {
   years: "/tenant/getallacademicyears",
@@ -25,6 +26,7 @@ const ENDPOINTS: Record<OptionSource, string> = {
   exams: "/tenant/getallexams",
   feeHeads: "/tenant/getallfeeheads",
   vehicles: "/tenant/getallvehicles",
+  departments: "/tenant/getalldepartments",
 };
 
 type AnyRow = Record<string, unknown>;
@@ -58,6 +60,7 @@ const MAPPERS: Record<OptionSource, (row: AnyRow) => SelectOption | null> = {
   exams: (r) => ({ label: pick(r, ["exam_name", "examName", "name"]), value: pick(r, ["id"]) }),
   feeHeads: (r) => ({ label: pick(r, ["feeName", "fee_name", "name"]), value: pick(r, ["id"]) }),
   vehicles: (r) => ({ label: pick(r, ["vehicle_number", "vehicleNumber", "name"]) || `Vehicle ${pick(r, ["id"])}`, value: pick(r, ["id"]) }),
+  departments: (r) => ({ label: pick(r, ["departmentName", "department_name", "name"]) || `Department ${pick(r, ["id"])}`, value: pick(r, ["id"]) }),
 };
 
 export function useSelectOptions(sources: OptionSource[]) {

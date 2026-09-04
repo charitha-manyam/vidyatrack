@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Screen } from "../../components/Screen";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
-import { PageHeader } from "../../components/ui/PageHeader";
 import { getPermissionCatalog, getRoleById, createRole, updateRole } from "../../api/role.api";
 import { getErrorMessage } from "../../lib/errors";
 import { colors } from "../../theme/colors";
@@ -22,6 +21,13 @@ const ACTIONS = ["create", "read", "update", "delete"] as const;
 export function RoleFormScreen({ navigation, route }: Props) {
   const roleId = route.params?.roleId;
   const isEdit = Boolean(roleId);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: isEdit ? "Edit role" : "Create role",
+      headerRight: () => <Button variant="secondary" title="Cancel" onPress={() => navigation.goBack()} />,
+    });
+  }, [navigation, isEdit]);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -118,17 +124,8 @@ export function RoleFormScreen({ navigation, route }: Props) {
   }
 
   return (
-    <Screen scroll={false}>
+    <Screen scroll={false} topInset={false}>
       <View style={styles.container}>
-        <PageHeader
-          title={isEdit ? "Edit role" : "Create role"}
-          description={
-            isEdit && isSystemDefault
-              ? "Editing permissions on a default role converts it to a custom one."
-              : "Pick what this role can do in each module."
-          }
-          actions={<Button variant="secondary" title="Cancel" onPress={() => navigation.goBack()} />}
-        />
 
         {loading ? (
           <View style={styles.center}>

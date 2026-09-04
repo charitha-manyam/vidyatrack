@@ -159,6 +159,11 @@ export async function getStaffStats() {
   return data.data!;
 }
 
+export async function getStaffById(id: string) {
+  const { data } = await apiClient.get<ApiResponse<StaffMember>>(`/tenant/getstaffById/${id}`);
+  return data.data;
+}
+
 export async function getPendingFeeSummary() {
   const { data } = await apiClient.get<ApiResponse<unknown> & PendingFeeSummaryResponse>(
     "/tenant/getallpendingsummary"

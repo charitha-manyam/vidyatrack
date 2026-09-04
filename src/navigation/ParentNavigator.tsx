@@ -20,9 +20,17 @@ import type { ParentTabParamList } from "./types";
 const Tab = createBottomTabNavigator<ParentTabParamList>();
 const MoreStack = createNativeStackNavigator<import("./types").ParentMoreStackParamList>();
 
+const headerOptions = {
+  headerStyle: { backgroundColor: colors.white },
+  headerTintColor: colors.ink,
+  headerTitleStyle: { color: colors.ink, fontWeight: "600" as const },
+  headerShadowVisible: false,
+  headerBackTitleVisible: false,
+};
+
 function ParentMoreNavigator() {
   return (
-    <MoreStack.Navigator>
+    <MoreStack.Navigator screenOptions={headerOptions}>
       <MoreStack.Screen name="MoreMenu" component={ParentMoreMenuScreen} options={{ headerShown: false }} />
       <MoreStack.Screen name="Children" component={ParentChildrenScreen} options={{ title: "Children" }} />
       <MoreStack.Screen name="Holidays" component={ParentHolidaysScreen} options={{ title: "Holidays" }} />

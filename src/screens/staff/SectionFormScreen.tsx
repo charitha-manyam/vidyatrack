@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Screen } from "../../components/Screen";
 import { Input } from "../../components/Input";
 import { Button } from "../../components/Button";
-import { PageHeader } from "../../components/ui/PageHeader";
 import { createSection, deleteSection, updateSection } from "../../api/school.api";
 import { getErrorMessage } from "../../lib/errors";
 import type { ClassesStackParamList } from "../../navigation/types";
@@ -14,6 +13,10 @@ type Props = NativeStackScreenProps<ClassesStackParamList, "SectionForm">;
 export function SectionFormScreen({ route, navigation }: Props) {
   const { classId, className, sectionId, sectionName, totalStrength } = route.params;
   const editing = sectionId ? { id: sectionId, sectionName: sectionName ?? "" } : null;
+
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: editing ? "Edit section" : "Add section" });
+  }, [navigation, editing]);
   const [name, setName] = useState(editing?.sectionName ?? "");
   const [strength, setStrength] = useState(String(totalStrength ?? 40));
   const [error, setError] = useState<string | null>(null);
@@ -69,13 +72,7 @@ export function SectionFormScreen({ route, navigation }: Props) {
   };
 
   return (
-    <Screen>
-      <PageHeader
-        title={editing ? "Edit section" : "Add section"}
-        description={
-          editing ? className : `New section for ${className ?? "this class"}.`
-        }
-      />
+    <Screen topInset={false}>
       <View style={styles.form}>
         <Input label="Section name" placeholder="e.g. A" value={name} onChangeText={setName} error={error ?? undefined} />
         <Input

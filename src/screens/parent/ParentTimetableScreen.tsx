@@ -4,7 +4,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Screen } from "../../components/Screen";
 import { DataState } from "../../components/DataState";
 import { ListRow } from "../../components/ListRow";
-import { PageHeader } from "../../components/ui/PageHeader";
 import { NeedChild } from "../../components/NeedChild";
 import { useActiveChild } from "../../context/ChildContext";
 import { getChildTimetable } from "../../api/parent.api";
@@ -23,6 +22,6 @@ export function ParentTimetableScreen() {
   }, [activeChild]);
   useFocusEffect(useCallback(() => { load(); }, [load]));
   if (!activeChild) return <NeedChild />;
-  return <Screen scroll={false}><View style={styles.container}><PageHeader title="Timetable" description={activeChild.name} /><DataState loading={loading} error={error} retry={load} empty={items.length === 0 ? "No timetable published yet." : null}><FlatList data={items} keyExtractor={(item) => item.id} contentContainerStyle={styles.list} renderItem={({ item }) => <ListRow title={`${item.day_of_week} · Period ${item.period_no}`} subtitle={`${item.subject?.subject_name ?? "Free period"}${item.teacher ? ` · ${item.teacher.name}` : ""}`} meta={item.time_sloat} tone="brand" />} /></DataState></View></Screen>;
+  return <Screen scroll={false} topInset={false}><View style={styles.container}><DataState loading={loading} error={error} retry={load} empty={items.length === 0 ? "No timetable published yet." : null}><FlatList data={items} keyExtractor={(item) => item.id} contentContainerStyle={styles.list} renderItem={({ item }) => <ListRow title={`${item.day_of_week} · Period ${item.period_no}`} subtitle={`${item.subject?.subject_name ?? "Free period"}${item.teacher ? ` · ${item.teacher.name}` : ""}`} meta={item.time_sloat} tone="brand" />} /></DataState></View></Screen>;
 }
 const styles = StyleSheet.create({ container: { flex: 1, padding: 20, gap: 12 }, list: { gap: 8, paddingBottom: 12 } });

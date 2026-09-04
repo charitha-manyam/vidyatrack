@@ -1,4 +1,4 @@
-﻿import { useCallback, useState } from "react";
+﻿import { useCallback, useLayoutEffect, useState } from "react";
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
@@ -6,7 +6,6 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Screen } from "../../components/Screen";
 import { DataState } from "../../components/DataState";
 import { Button } from "../../components/Button";
-import { PageHeader } from "../../components/ui/PageHeader";
 import { Badge } from "../../components/ui/Badge";
 import { PermissionGate, staffPermissions } from "../../components/PermissionGate";
 import { useAuth } from "../../context/AuthContext";
@@ -27,6 +26,12 @@ export function RolesScreen({ navigation }: Props) {
   const permissions = staffPermissions(session);
   const canWrite = hasPermission(permissions, MODULES.ROLES, "create");
   const canDelete = hasPermission(permissions, MODULES.ROLES, "delete");
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => canWrite ? <Button title="+ Create role" onPress={() => navigation.navigate("RoleForm", undefined)} /> : null,
+    });
+  }, [navigation, canWrite]);
 
   const [roles, setRoles] = useState<TenantRole[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,17 +91,8 @@ export function RolesScreen({ navigation }: Props) {
 
   return (
     <PermissionGate module={MODULES.ROLES} action="read">
-      <Screen scroll={false}>
+      <Screen scroll={false} topInset={false}>
         <View style={styles.container}>
-          <PageHeader
-            title="Roles & Permissions"
-            description="Control what each staff role can see and do."
-            actions={
-              canWrite ? (
-                <Button title="+ Create role" onPress={() => navigation.navigate("RoleForm", undefined)} />
-              ) : null
-            }
-          />
           <DataState loading={loading} error={error} retry={load} empty={roles.length === 0 ? "No roles yet." : null}>
             <FlatList
               contentContainerStyle={styles.listContent}

@@ -14,7 +14,7 @@ type Props = NativeStackScreenProps<MoreStackParamList, "ModulePlaceholder">;
 export function ModulePlaceholderScreen({ navigation, route }: Props) {
   const title = route.params?.title ?? "Module";
   return (
-    <Screen>
+    <Screen topInset={false}>
       <View style={styles.wrap}>
         <View style={styles.iconChip}>
           <Feather name="grid" size={22} color={colors.brand600} />

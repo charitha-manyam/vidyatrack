@@ -106,11 +106,11 @@ export const RESOURCES: Record<string, ResourceConfig> = {
     deletePath: (id) => `/tenant/deleteschoolworkingday/${id}`,
     subtitleKeys: ["no_of_periods"],
     fields: [
-      { key: "academicYearId", label: "Academic year", type: "select", required: true, source: "years" },
-      { key: "start_time", label: "Start time", type: "time", required: true },
-      { key: "end_time", label: "End time", type: "time", required: true },
-      { key: "no_of_periods", label: "No. of periods", type: "number", required: true },
-      { key: "duration_of_period", label: "Period duration (min)", type: "number", required: true },
+      { key: "academicYearId", label: "Academic year", type: "select", source: "years" },
+      { key: "start_time", label: "Start time", type: "time" },
+      { key: "end_time", label: "End time", type: "time" },
+      { key: "no_of_periods", label: "No. of periods", type: "number" },
+      { key: "duration_of_period", label: "Period duration (min)", type: "number" },
     ],
   },
 

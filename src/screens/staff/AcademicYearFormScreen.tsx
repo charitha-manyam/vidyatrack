@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Screen } from "../../components/Screen";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
-import { PageHeader } from "../../components/ui/PageHeader";
+import { DateInput } from "../../components/DateInput";
 import { createAcademicYear, updateAcademicYear } from "../../api/academicYear.api";
 import { getErrorMessage } from "../../lib/errors";
 import { colors } from "../../theme/colors";
@@ -24,6 +24,12 @@ export function AcademicYearFormScreen({ navigation, route }: Props) {
   const [endDate, setEndDate] = useState((route.params?.endDate ?? "").slice(0, 10));
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <Button variant="secondary" title="Cancel" onPress={() => navigation.goBack()} />,
+    });
+  }, [navigation]);
 
   async function handleSubmit() {
     if (!yearName.trim()) {
@@ -61,16 +67,12 @@ export function AcademicYearFormScreen({ navigation, route }: Props) {
   }
 
   return (
-    <Screen scroll={false}>
+    <Screen scroll={false} topInset={false}>
       <View style={styles.container}>
-        <PageHeader
-          title={editing ? "Edit academic year" : "Add academic year"}
-          actions={<Button variant="secondary" title="Cancel" onPress={() => navigation.goBack()} />}
-        />
         <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
           <Input label="Year name" placeholder="e.g. 2026-27" value={yearName} onChangeText={setYearName} />
-          <Input label="Start date (YYYY-MM-DD)" placeholder="2026-04-01" value={startDate} onChangeText={setStartDate} autoCapitalize="none" />
-          <Input label="End date (YYYY-MM-DD)" placeholder="2027-03-31" value={endDate} onChangeText={setEndDate} autoCapitalize="none" />
+          <DateInput label="Start date" value={startDate} onChangeDate={setStartDate} />
+          <DateInput label="End date" value={endDate} onChangeDate={setEndDate} />
           {fieldError ? <Text style={styles.error}>{fieldError}</Text> : null}
           <View style={styles.footer}>
             <Button title={editing ? "Save changes" : "Create academic year"} onPress={handleSubmit} isLoading={isSubmitting} />

@@ -1,7 +1,6 @@
 ﻿import { useCallback, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { PageHeader } from "../../components/ui/PageHeader";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Screen } from "../../components/Screen";
 import { DataState } from "../../components/DataState";
@@ -38,9 +37,8 @@ export function AttendanceReportScreen({ }: Props) {
   );
 
   return (
-    <Screen scroll={false}>
+    <Screen scroll={false} topInset={false}>
       <View style={styles.container}>
-        <PageHeader title="Attendance alerts" description="Students absent more than 5 days" />
         <DataState loading={loading} error={error} retry={load} empty={items.length === 0 ? "No chronic absentees - nice." : null}>
           <FlatList
             contentContainerStyle={styles.listContent}

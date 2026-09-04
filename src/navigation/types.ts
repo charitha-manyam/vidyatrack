@@ -35,12 +35,14 @@ export type MoreStackParamList = {
   AcademicYearForm:
     | { yearId?: string; yearName?: string; startDate?: string; endDate?: string }
     | undefined;
+  AcademicYearPromotion: { kind: "students" | "staff" };
   ModulePlaceholder: { title: string };
   ResourceList: { resourceId: string };
   ResourceForm: { resourceId: string; itemId?: string };
   MarkAttendance: undefined;
   AttendanceReport: undefined;
   StaffDirectory: undefined;
+  StaffForm: { staffId?: string } | undefined;
   Profile: undefined;
 };
 
