@@ -174,7 +174,7 @@ export function DashboardScreen({ navigation }: Props) {
                     sublabel={`${data.pendingStudents} ${data.pendingStudents === 1 ? "student" : "students"}`}
                     icon="credit-card"
                     tone={data.pendingAmount > 0 ? "red" : "green"}
-                    onPress={() => navigation.navigate("Fees")}
+                    onPress={() => navigation.navigate("Fees", { screen: "FeesMenu" })}
                   />
                 )}
               </View>
@@ -249,7 +249,7 @@ export function DashboardScreen({ navigation }: Props) {
               />
             )}
             {canReadFees && (
-              <ModuleCard title="Fees" icon="credit-card" links={[{ title: "Pending fee summary", onPress: () => navigation.navigate("Fees") }]} />
+              <ModuleCard title="Fees" icon="credit-card" links={[{ title: "Pending fee summary", onPress: () => navigation.navigate("Fees", { screen: "FeesMenu" }) }]} />
             )}
           </View>
         )}

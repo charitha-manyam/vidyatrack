@@ -8,7 +8,7 @@ interface DataStateProps {
   error?: string | null;
   retry?: () => void;
   empty?: string | null;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export function DataState({ loading, error, retry, empty, children }: DataStateProps) {

@@ -1,4 +1,7 @@
 import type { Permission } from "../types/auth";
+import type { FeesStackParamList } from "../navigation/types";
+
+export type FeesSubscreen = Exclude<keyof FeesStackParamList, "FeesMenu">;
 
 // Port of admin-portal's src/config/rbac.ts — the single source of truth for
 // "can this user do X" across the app. Mirrors the backend
@@ -84,7 +87,7 @@ export function getVisibleNavGroups(permissions: Permission[] | undefined | null
 export type MobileDestination =
   | { kind: "studentsList" }
   | { kind: "classesList" }
-  | { kind: "feesTab" }
+  | { kind: "fees"; screen: FeesSubscreen }
   | { kind: "more"; screen: MoreScreen }
   | { kind: "resource"; resourceId: string }
   | { kind: "placeholder" };
@@ -95,6 +98,10 @@ export type MoreScreen =
   | "AcademicYears"
   | "MarkAttendance"
   | "AttendanceReport"
+  | "StaffAttendance"
+  | "Leaves"
+  | "LeaveAllocations"
+  | "Payslips"
   | "ModulePlaceholder";
 
 const DESTINATION_MAP: Record<string, MobileDestination> = {
@@ -104,8 +111,9 @@ const DESTINATION_MAP: Record<string, MobileDestination> = {
   "/staff": { kind: "more", screen: "StaffDirectory" },
   "/roles": { kind: "more", screen: "Roles" },
   "/attendance": { kind: "more", screen: "MarkAttendance" },
-  "/fees/pending": { kind: "feesTab" },
-  "/fees/summary": { kind: "feesTab" },
+  "/staff-attendance": { kind: "more", screen: "StaffAttendance" },
+  "/fees/pending": { kind: "fees", screen: "PendingFees" },
+  "/fees/summary": { kind: "fees", screen: "StudentFeeSummary" },
   "/subjects": { kind: "resource", resourceId: "subjects" },
   "/school-working-days": { kind: "resource", resourceId: "school-working-days" },
   "/timetable": { kind: "resource", resourceId: "timetable" },
@@ -115,17 +123,16 @@ const DESTINATION_MAP: Record<string, MobileDestination> = {
   "/homework": { kind: "resource", resourceId: "homework" },
   "/departments": { kind: "resource", resourceId: "departments" },
   "/designations": { kind: "resource", resourceId: "designations" },
-  "/staff-attendance": { kind: "resource", resourceId: "staff-attendance" },
-  "/leaves": { kind: "resource", resourceId: "leaves" },
-  "/leave-allocations": { kind: "resource", resourceId: "leave-allocations" },
+  "/leaves": { kind: "more", screen: "Leaves" },
+  "/leave-allocations": { kind: "more", screen: "LeaveAllocations" },
   "/payroll": { kind: "resource", resourceId: "payroll" },
-  "/payslips": { kind: "resource", resourceId: "payslips" },
-  "/fees/heads": { kind: "resource", resourceId: "fee-heads" },
-  "/fees/structures": { kind: "resource", resourceId: "fee-structures" },
-  "/fees/assignments": { kind: "resource", resourceId: "fee-assignments" },
-  "/fees/concessions": { kind: "resource", resourceId: "concessions" },
-  "/fees/payments": { kind: "resource", resourceId: "payments" },
-  "/fees/payment-links": { kind: "resource", resourceId: "payment-links" },
+  "/payslips": { kind: "more", screen: "Payslips" },
+  "/fees/heads": { kind: "fees", screen: "FeeHeads" },
+  "/fees/structures": { kind: "fees", screen: "FeeStructures" },
+  "/fees/assignments": { kind: "fees", screen: "FeeAssignments" },
+  "/fees/concessions": { kind: "fees", screen: "Concessions" },
+  "/fees/payments": { kind: "fees", screen: "FeePayments" },
+  "/fees/payment-links": { kind: "fees", screen: "FeePaymentLinks" },
   "/transport/routes": { kind: "resource", resourceId: "transport-routes" },
   "/transport/assignments": { kind: "resource", resourceId: "student-transport" },
 };

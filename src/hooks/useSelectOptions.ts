@@ -55,7 +55,10 @@ const MAPPERS: Record<OptionSource, (row: AnyRow) => SelectOption | null> = {
       [pick(r, ["first_name", "firstName"]), pick(r, ["last_name", "lastName"])].filter(Boolean).join(" ") ||
       `Student ${pick(r, ["id"])}`,
     value: pick(r, ["id"]),
-  }),
+    // extra fields used to filter students by their class/section
+    ...(pick(r, ["class_id", "classId", "ClassId"]) ? { classId: pick(r, ["class_id", "classId", "ClassId"]) } : {}),
+    ...(pick(r, ["sectionId", "section_id", "SectionId"]) ? { sectionId: pick(r, ["sectionId", "section_id", "SectionId"]) } : {}),
+  }) as SelectOption,
   subjects: (r) => ({ label: pick(r, ["subject_name", "subjectName", "name"]), value: pick(r, ["id"]) }),
   exams: (r) => ({ label: pick(r, ["exam_name", "examName", "name"]), value: pick(r, ["id"]) }),
   feeHeads: (r) => ({ label: pick(r, ["feeName", "fee_name", "name"]), value: pick(r, ["id"]) }),
@@ -106,5 +109,18 @@ export function sectionsFor(options: Partial<Record<OptionSource, SelectOption[]
   if (!classValue) return (options.sections ?? []) as SelectOption[];
   return ((options.sections ?? []) as (SelectOption & { classId?: string })[]).filter(
     (s) => !s.classId || s.classId === classValue
+  );
+}
+
+// Students belong to a class (and optionally a section); filter client side
+// when either changes.
+export function studentsFor(
+  options: Partial<Record<OptionSource, SelectOption[]>>,
+  classValue: string,
+  sectionValue?: string
+): SelectOption[] {
+  const list = (options.students ?? []) as (SelectOption & { classId?: string; sectionId?: string })[];
+  return list.filter(
+    (s) => (!s.classId || !classValue || s.classId === classValue) && (!s.sectionId || !sectionValue || s.sectionId === sectionValue)
   );
 }

@@ -3,12 +3,15 @@ import type { ApiResponse } from "../types/api";
 import type {
   AbsenteeItem,
   AttendanceStatus,
+  BulkStaffAttendanceResult,
   MarkAttendancePayload,
   MarkAttendanceResult,
   MonthlyAttendanceResponse,
   PendingFeeSummaryResponse,
   SchoolClass,
   Section,
+  StaffAttendanceRecord,
+  StaffListItem,
   StaffMember,
   StaffStats,
   Student,
@@ -188,6 +191,19 @@ export async function markAttendance(payload: MarkAttendancePayload) {
 export async function getMonthlyAttendance(studentId: string, month: number, year: number) {
   const { data } = await apiClient.get<MonthlyAttendanceResponse>("/tenant/getMonthlyAttendanceByStudentId", {
     params: { studentId, month, year },
+  });
+  return data;
+}
+
+export async function getStaffList() {
+  const { data } = await apiClient.get<ApiResponse<StaffListItem[]>>("/tenant/getallstaff");
+  return data.data ?? [];
+}
+
+export async function bulkMarkStaffAttendance(records: StaffAttendanceRecord[], school_code: string) {
+  const { data } = await apiClient.post<BulkStaffAttendanceResult>("/tenant/bulkaddstaffattendance", {
+    attendance_records: records,
+    school_code,
   });
   return data;
 }

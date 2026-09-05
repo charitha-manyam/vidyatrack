@@ -159,3 +159,28 @@ export interface AbsenteeItem {
   student_name: string;
   absent_count: number;
 }
+
+export const STAFF_ATTENDANCE_STATUSES = ["present", "absent", "halfday", "leave"] as const;
+export type StaffAttendanceStatus = (typeof STAFF_ATTENDANCE_STATUSES)[number];
+
+export interface StaffAttendanceRecord {
+  staff_id: string;
+  date: string;
+  status: StaffAttendanceStatus;
+}
+
+export interface BulkStaffAttendanceResult {
+  status: boolean;
+  message: string;
+  count: number;
+  data: unknown[];
+  auto_leaves?: { staff_id: string; date: string; status: string; leave_type?: string; leave_id?: string }[];
+  errors?: { row: number; errors: string[] }[];
+}
+
+export interface StaffListItem {
+  id: string;
+  name: string;
+  role?: string | null;
+  emp_number?: string | null;
+}

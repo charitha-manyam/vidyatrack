@@ -55,8 +55,15 @@ export function ResourceFormScreen({ navigation, route }: Props) {
   useEffect(() => {
     if (config?.id === "school-working-days" && !route.params.itemId) {
       setForm({ no_of_periods: "8", duration_of_period: "40" });
+    } else if (!route.params.itemId && config) {
+      const defaults = Object.fromEntries(
+        config.fields
+          .filter((field) => field.defaultValue !== undefined)
+          .map((field) => [field.key, String(field.defaultValue)])
+      ) as Record<string, string>;
+      if (Object.keys(defaults).length) setForm((current) => ({ ...defaults, ...current }));
     }
-  }, [config?.id, route.params.itemId]);
+  }, [config?.id, route.params.itemId, config]);
   const configuredSources = (config?.fields ?? []).map((field) => field.source).filter(Boolean);
   const sources = Array.from(new Set(config?.id === "subjects" ? [...configuredSources, "years"] : configuredSources)) as Parameters<typeof useSelectOptions>[0];
   const { options } = useSelectOptions(sources);
@@ -102,7 +109,11 @@ export function ResourceFormScreen({ navigation, route }: Props) {
         };
         if (route.params.itemId && config!.updatePath) await updateResource(config!, route.params.itemId, values); else if (config!.createPath) await createResource(config!, values); else { setError("This module does not support create or update."); return; }
       } else {
-        const values = Object.fromEntries(config!.fields.map((field) => [field.key, field.type === "number" ? Number(form[field.key]) : form[field.key] ?? ""]));
+        const values = Object.fromEntries(config!.fields.map((field) => {
+          if (field.type === "number") return [field.key, Number(form[field.key])];
+          if (field.type === "checkbox") return [field.key, form[field.key] === "true"];
+          return [field.key, form[field.key] ?? ""];
+        }));
         if (route.params.itemId && config!.updatePath) await updateResource(config!, route.params.itemId, values); else if (config!.createPath) await createResource(config!, values); else { setError("This module does not support create or update."); return; }
       }
       navigation.goBack();
@@ -182,7 +193,20 @@ export function ResourceFormScreen({ navigation, route }: Props) {
             <Text>Loading...</Text>
           ) : (
             config.fields.map((field) =>
-              field.type === "select" ? (
+              field.type === "checkbox" ? (
+                <Pressable
+                  key={field.key}
+                  style={styles.checkRow}
+                  onPress={() => setForm((current) => ({ ...current, [field.key]: current[field.key] === "true" ? "false" : "true" }))}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: form[field.key] === "true" }}
+                >
+                  <View style={[styles.checkBox, form[field.key] === "true" && styles.checkBoxChecked]}>
+                    {form[field.key] === "true" ? <Feather name="check" size={13} color={colors.white} /> : null}
+                  </View>
+                  <Text style={styles.checkLabel}>{field.label}</Text>
+                </Pressable>
+              ) : field.type === "select" ? (
                 <SubjectSelect
                   key={field.key}
                   label={field.label}
@@ -255,6 +279,10 @@ const styles = StyleSheet.create({
   dayOption: { flexDirection: "row", alignItems: "center", gap: 7, minWidth: 92 },
   workingCheckbox: { width: 18, height: 18, borderWidth: 1, borderColor: colors.lineStrong, borderRadius: 3, alignItems: "center", justifyContent: "center", backgroundColor: colors.white },
   workingCheckboxChecked: { backgroundColor: colors.brand600, borderColor: colors.brand600 },
+  checkRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 6 },
+  checkBox: { width: 20, height: 20, borderWidth: 1, borderColor: colors.lineStrong, borderRadius: 4, alignItems: "center", justifyContent: "center", backgroundColor: colors.white },
+  checkBoxChecked: { backgroundColor: colors.brand600, borderColor: colors.brand600 },
+  checkLabel: { fontSize: 15, color: colors.ink },
   dayText: { fontSize: 14, color: colors.inkSoft },
   workingRow: { flexDirection: "row", gap: 12 },
   workingHalf: { flex: 1 },

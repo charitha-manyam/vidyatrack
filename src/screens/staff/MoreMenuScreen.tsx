@@ -35,8 +35,8 @@ export function MoreMenuScreen({ navigation }: Props) {
       case "classesList":
         navigation.navigate("Classes", { screen: "ClassesList" });
         break;
-      case "feesTab":
-        navigation.navigate("Fees");
+      case "fees":
+        navigation.navigate("Fees", { screen: dest.screen });
         break;
       case "more":
         if (dest.screen === "ModulePlaceholder") {

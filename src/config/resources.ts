@@ -12,10 +12,11 @@ export interface SelectOption {
 export interface FieldDef {
   key: string;
   label: string;
-  type?: "text" | "number" | "date" | "time" | "textarea" | "select";
+  type?: "text" | "number" | "date" | "time" | "textarea" | "select" | "checkbox";
   required?: boolean;
   options?: SelectOption[];
   source?: "years" | "classes" | "sections" | "staff" | "students" | "subjects" | "exams" | "feeHeads" | "vehicles";
+  defaultValue?: string | boolean;
 }
 
 export interface RowAction {
@@ -73,6 +74,22 @@ const CONCESSION_TYPES: SelectOption[] = [
 const DISCOUNT_TYPES: SelectOption[] = [
   { label: "Percentage", value: "PERCENTAGE" },
   { label: "Fixed", value: "FIXED" },
+];
+const LEAVE_TYPE_OPTIONS: SelectOption[] = [
+  { label: "Casual", value: "casual" },
+  { label: "Sick", value: "sick" },
+  { label: "Emergency", value: "emergency" },
+  { label: "Personal", value: "personal" },
+];
+const BILLING_CYCLE_OPTIONS: SelectOption[] = [
+  { label: "One time", value: "ONE_TIME" },
+  { label: "Monthly", value: "MONTHLY" },
+  { label: "Quarterly", value: "QUARTERLY" },
+  { label: "Annual", value: "ANNUAL" },
+];
+const APPLICABLE_TO_OPTIONS: SelectOption[] = [
+  { label: "All students in this class/section", value: "ALL_STUDENTS" },
+  { label: "Selected students only", value: "SELECTED_STUDENTS" },
 ];
 
 export const RESOURCES: Record<string, ResourceConfig> = {
@@ -284,10 +301,11 @@ export const RESOURCES: Record<string, ResourceConfig> = {
     ],
     fields: [
       { key: "staff_id", label: "Staff member", type: "select", required: true, source: "staff" },
-      { key: "leave_type", label: "Leave type", required: true },
+      { key: "leave_type", label: "Leave type", type: "select", required: true, options: LEAVE_TYPE_OPTIONS },
       { key: "start_date", label: "Start date", type: "date", required: true },
       { key: "end_date", label: "End date", type: "date", required: true },
       { key: "reason", label: "Reason", type: "textarea", required: true },
+      { key: "school_code", label: "School code", required: true },
     ],
   },
 
@@ -379,7 +397,11 @@ export const RESOURCES: Record<string, ResourceConfig> = {
       { key: "sectionId", label: "Section", type: "select", source: "sections" },
       { key: "amount", label: "Amount", type: "number", required: true },
       { key: "dueDate", label: "Due date", type: "date" },
+      { key: "billingCycle", label: "Billing cycle", type: "select", options: BILLING_CYCLE_OPTIONS },
+      { key: "isMandatory", label: "Mandatory", type: "checkbox", defaultValue: true },
+      { key: "allowConcession", label: "Allow concession", type: "checkbox", defaultValue: true },
       { key: "status", label: "Status", type: "select", options: STATUS_OPTIONS },
+      { key: "applicableTo", label: "Applicable to", type: "select", options: APPLICABLE_TO_OPTIONS },
     ],
   },
 

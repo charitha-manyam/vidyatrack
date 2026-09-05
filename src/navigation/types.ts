@@ -41,6 +41,10 @@ export type MoreStackParamList = {
   ResourceForm: { resourceId: string; itemId?: string };
   MarkAttendance: undefined;
   AttendanceReport: undefined;
+  StaffAttendance: undefined;
+  Leaves: undefined;
+  LeaveAllocations: undefined;
+  Payslips: undefined;
   StaffDirectory: undefined;
   StaffForm: { staffId?: string } | undefined;
   Profile: undefined;
@@ -65,10 +69,27 @@ export type ParentTabParamList = {
   Profile: undefined;
 };
 
+export type FeesStackParamList = {
+  FeesMenu: undefined;
+  FeeHeads: undefined;
+  FeeHeadForm: { feeHeadId?: string } | undefined;
+  FeeStructures: undefined;
+  FeeStructureForm: { feeStructureId?: string } | undefined;
+  FeeAssignments: undefined;
+  FeeAssignmentForm: { assignmentId?: string } | undefined;
+  Concessions: undefined;
+  ConcessionForm: { concessionId?: string } | undefined;
+  FeePayments: undefined;
+  FeePaymentForm: { paymentId?: string } | undefined;
+  FeePaymentLinks: undefined;
+  StudentFeeSummary: undefined;
+  PendingFees: undefined;
+};
+
 export type StaffTabParamList = {
   Home: undefined;
   Students: NavigatorScreenParams<StudentsStackParamList>;
   Classes: NavigatorScreenParams<ClassesStackParamList>;
-  Fees: undefined;
+  Fees: NavigatorScreenParams<FeesStackParamList>;
   More: NavigatorScreenParams<MoreStackParamList>;
 };

@@ -9,9 +9,21 @@ import { ClassesScreen } from "../screens/staff/ClassesScreen";
 import { ClassDetailScreen } from "../screens/staff/ClassDetailScreen";
 import { ClassFormScreen } from "../screens/staff/ClassFormScreen";
 import { SectionFormScreen } from "../screens/staff/SectionFormScreen";
-import { FeesScreen } from "../screens/staff/FeesScreen";
+import { FeesMenuScreen } from "../screens/staff/FeesMenuScreen";
+import { FeeHeadsScreen, FeeHeadFormScreen } from "../screens/staff/FeeHeadsScreen";
+import { FeeStructuresScreen, FeeStructureFormScreen } from "../screens/staff/FeeStructuresScreen";
+import { FeeAssignmentsScreen, FeeAssignmentFormScreen } from "../screens/staff/FeeAssignmentsScreen";
+import { ConcessionsScreen, ConcessionFormScreen } from "../screens/staff/ConcessionsScreen";
+import { FeePaymentsScreen, FeePaymentFormScreen } from "../screens/staff/FeePaymentsScreen";
+import { FeePaymentLinksScreen } from "../screens/staff/FeePaymentLinksScreen";
+import { StudentFeeSummaryScreen } from "../screens/staff/StudentFeeSummaryScreen";
+import { PendingFeesScreen } from "../screens/staff/PendingFeesScreen";
 import { MarkAttendanceScreen } from "../screens/staff/MarkAttendanceScreen";
 import { AttendanceReportScreen } from "../screens/staff/AttendanceReportScreen";
+import { StaffAttendanceScreen } from "../screens/staff/StaffAttendanceScreen";
+import { LeavesScreen } from "../screens/staff/LeavesScreen";
+import { LeaveAllocationsScreen } from "../screens/staff/LeaveAllocationsScreen";
+import { PayslipsScreen } from "../screens/staff/PayslipsScreen";
 import { StaffDirectoryScreen } from "../screens/staff/StaffDirectoryScreen";
 import { StaffFormScreen } from "../screens/staff/StaffFormScreen";
 import { MoreMenuScreen } from "../screens/staff/MoreMenuScreen";
@@ -30,6 +42,7 @@ import { staffPermissions } from "../components/PermissionGate";
 import { colors } from "../theme/colors";
 import type {
   ClassesStackParamList,
+  FeesStackParamList,
   MoreStackParamList,
   StaffTabParamList,
   StudentsStackParamList,
@@ -38,6 +51,7 @@ import type {
 const Tab = createBottomTabNavigator<StaffTabParamList>();
 const StudentsStack = createNativeStackNavigator<StudentsStackParamList>();
 const ClassesStack = createNativeStackNavigator<ClassesStackParamList>();
+const FeesStack = createNativeStackNavigator<FeesStackParamList>();
 const MoreStack = createNativeStackNavigator<MoreStackParamList>();
 
 const headerOptions = {
@@ -78,6 +92,27 @@ function ClassesNavigator() {
         options={{ headerShown: true, title: "Section", ...headerOptions }}
       />
     </ClassesStack.Navigator>
+  );
+}
+
+function FeesNavigator() {
+  return (
+    <FeesStack.Navigator screenOptions={{ headerShown: true, ...headerOptions }}>
+      <FeesStack.Screen name="FeesMenu" component={FeesMenuScreen} options={{ headerShown: false }} />
+      <FeesStack.Screen name="FeeHeads" component={FeeHeadsScreen} options={{ title: "Fee Heads" }} />
+      <FeesStack.Screen name="FeeHeadForm" component={FeeHeadFormScreen} options={{ title: "Fee head" }} />
+      <FeesStack.Screen name="FeeStructures" component={FeeStructuresScreen} options={{ title: "Fee Structures" }} />
+      <FeesStack.Screen name="FeeStructureForm" component={FeeStructureFormScreen} options={{ title: "Fee structure" }} />
+      <FeesStack.Screen name="FeeAssignments" component={FeeAssignmentsScreen} options={{ title: "Student Fee Assignments" }} />
+      <FeesStack.Screen name="FeeAssignmentForm" component={FeeAssignmentFormScreen} options={{ title: "Assignment" }} />
+      <FeesStack.Screen name="Concessions" component={ConcessionsScreen} options={{ title: "Concessions" }} />
+      <FeesStack.Screen name="ConcessionForm" component={ConcessionFormScreen} options={{ title: "Concession" }} />
+      <FeesStack.Screen name="FeePayments" component={FeePaymentsScreen} options={{ title: "Fee Payments" }} />
+      <FeesStack.Screen name="FeePaymentForm" component={FeePaymentFormScreen} options={{ title: "Record payment" }} />
+      <FeesStack.Screen name="FeePaymentLinks" component={FeePaymentLinksScreen} options={{ title: "Fee Payment Links" }} />
+      <FeesStack.Screen name="StudentFeeSummary" component={StudentFeeSummaryScreen} options={{ title: "Student Fee Summary" }} />
+      <FeesStack.Screen name="PendingFees" component={PendingFeesScreen} options={{ title: "Pending Fees" }} />
+    </FeesStack.Navigator>
   );
 }
 
@@ -123,6 +158,10 @@ function MoreNavigator() {
       />
       <MoreStack.Screen name="MarkAttendance" component={MarkAttendanceScreen} options={{ title: "Mark attendance" }} />
       <MoreStack.Screen name="AttendanceReport" component={AttendanceReportScreen} options={{ title: "Attendance alerts" }} />
+      <MoreStack.Screen name="StaffAttendance" component={StaffAttendanceScreen} options={{ title: "Staff Attendance" }} />
+      <MoreStack.Screen name="Leaves" component={LeavesScreen} options={{ title: "Leaves" }} />
+      <MoreStack.Screen name="LeaveAllocations" component={LeaveAllocationsScreen} options={{ title: "Staff Leave Allocations" }} />
+      <MoreStack.Screen name="Payslips" component={PayslipsScreen} options={{ title: "Payslips" }} />
       <MoreStack.Screen name="StaffDirectory" component={StaffDirectoryScreen} options={{ title: "Staff directory" }} />
       <MoreStack.Screen name="StaffForm" component={StaffFormScreen} options={{ title: "Add staff member" }} />
       <MoreStack.Screen name="Profile" component={ProfileScreen} options={{ title: "Profile" }} />
@@ -164,7 +203,7 @@ export function StaffNavigator() {
       {canReadFees ? (
         <Tab.Screen
           name="Fees"
-          component={FeesScreen}
+          component={FeesNavigator}
           options={{ tabBarIcon: ({ color, size }) => <Feather name="credit-card" color={color} size={size} /> }}
         />
       ) : null}
