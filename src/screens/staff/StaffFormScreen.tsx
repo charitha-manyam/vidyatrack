@@ -182,7 +182,7 @@ export function StaffFormScreen({ navigation, route }: Props) {
     try {
       const payload = {
         ...form,
-        can_be_driver: driver,
+        is_driver: driver,
         role:
           form.role === "Default (Staff)" ? "staff" : form.role.toLowerCase(),
       };

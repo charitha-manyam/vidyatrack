@@ -14,19 +14,24 @@ export function InlineSelect({
   options,
   onSelect,
   placeholder = "Select",
+  disabled,
 }: {
   label: string;
   value: string;
   options: SelectOption[];
   onSelect: (v: string) => void;
   placeholder?: string;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const display = options.find((o) => o.value === value);
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
-      <Pressable style={[styles.select, open && styles.selectOpen]} onPress={() => setOpen((c) => !c)}>
+      <Pressable
+        style={[styles.select, open && styles.selectOpen, disabled && styles.selectDisabled]}
+        onPress={disabled ? undefined : () => setOpen((c) => !c)}
+      >
         <Text style={display && display.value ? styles.selectText : styles.placeholder}>
           {display ? display.label : placeholder}
         </Text>
@@ -34,7 +39,7 @@ export function InlineSelect({
           <Feather
             name={open ? "chevron-up" : "chevron-down"}
             size={16}
-            color={open ? colors.white : colors.inkFaint}
+            color={open ? colors.white : disabled ? colors.inkGhost : colors.inkFaint}
           />
         </View>
       </Pressable>
@@ -76,6 +81,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   selectOpen: { borderColor: colors.brand500 },
+  selectDisabled: { backgroundColor: colors.surfaceMuted, opacity: 0.7 },
   selectText: { flex: 1, fontSize: 15, color: colors.ink },
   placeholder: { flex: 1, fontSize: 15, color: colors.inkFaint },
   chevron: {

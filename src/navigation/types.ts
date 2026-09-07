@@ -48,6 +48,17 @@ export type MoreStackParamList = {
   StaffDirectory: undefined;
   StaffForm: { staffId?: string } | undefined;
   Profile: undefined;
+  TransportRoutes: undefined;
+  TransportRouteForm: { routeId?: string } | undefined;
+  StudentTransport: undefined;
+  StudentAssignForm: undefined;
+  Vehicles: undefined;
+  VehicleForm: { vehicleId?: string } | undefined;
+  VehicleAssignments: undefined;
+  VehicleAssignmentForm: undefined;
+  TransportFees: undefined;
+  TransportFeeForm: { transportFeeId?: string } | undefined;
+  LiveTracking: undefined;
 };
 
 export type ParentMoreStackParamList = {
@@ -84,6 +95,7 @@ export type FeesStackParamList = {
   FeePaymentLinks: undefined;
   StudentFeeSummary: undefined;
   PendingFees: undefined;
+  PaymentSettings: undefined;
 };
 
 export type StaffTabParamList = {

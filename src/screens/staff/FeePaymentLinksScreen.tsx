@@ -48,6 +48,7 @@ export function FeePaymentLinksScreen(_: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const [feeStructureId, setFeeStructureId] = useState("");
+  const [amount, setAmount] = useState("");
   const [expiresInHours, setExpiresInHours] = useState("24");
   const [generatedLink, setGeneratedLink] = useState<FeePaymentLink | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -97,10 +98,12 @@ export function FeePaymentLinksScreen(_: Props) {
     setGenerating(true);
     try {
       const hours = Number(expiresInHours || 24);
+      const amt = Number(amount || 0);
       const res = await createPaymentLink({
         studentId,
         fee_type_id: feeStructureId,
         expiresInHours: isFinite(hours) && hours > 0 ? hours : 24,
+        amount: isFinite(amt) && amt > 0 ? amt : undefined,
       });
       setGeneratedLink(res ?? null);
       Alert.alert("Link generated", "Share the payment link with the student.");
@@ -160,6 +163,12 @@ export function FeePaymentLinksScreen(_: Props) {
                       options={eligible}
                       onSelect={setFeeStructureId}
                       placeholder="Select a due fee"
+                    />
+                    <Input
+                      label="Amount (Rs, optional)"
+                      value={amount}
+                      onChangeText={setAmount}
+                      keyboardType="numeric"
                     />
                     <Input
                       label="Expires in (hours)"

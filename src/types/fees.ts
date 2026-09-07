@@ -29,10 +29,10 @@ export const PAYMENT_MODE_OPTIONS = [
 ];
 
 export const CONCESSION_TYPE_OPTIONS = [
-  { value: "PERCENTAGE_OF_FEE", label: "% of total fee" },
-  { value: "FLAT_AMOUNT", label: "Flat amount" },
-  { value: "SIBLING_DISCOUNT", label: "Sibling discount" },
-  { value: "OTHER", label: "Other" },
+  { value: "SCHOLARSHIP", label: "Scholarship" },
+  { value: "SIBLING", label: "Sibling" },
+  { value: "STAFF_CHILD", label: "Staff child" },
+  { value: "SPECIAL", label: "Special" },
 ];
 
 export const DISCOUNT_TYPE_OPTIONS = [
@@ -150,6 +150,7 @@ export interface FeePaymentLink {
 export interface FeeSummaryDetail {
   fee_structure?: string;
   fee_name?: string;
+  type?: string;
   originalAmount: number;
   discountAmount: number;
   finalAmount: number;
@@ -182,6 +183,7 @@ export interface PendingFeeBreakdownItem {
   paidAmount: number;
   balanceAmount: number;
   dueDate?: string;
+  status?: string;
 }
 
 export interface PendingFeeTotals {

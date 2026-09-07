@@ -18,6 +18,7 @@ import {
   createConcession,
   deleteConcession,
   getConcessions,
+  getFeeHeads,
   getFeeStructures,
   updateConcession,
 } from "../../api/fees.api";
@@ -159,11 +160,15 @@ export function ConcessionFormScreen({ navigation, route }: FormProps) {
   const { options } = useSelectOptions(["students"]);
 
   const [structures, setStructures] = useState<FeeStructure[]>([]);
+  const [feeHeadMap, setFeeHeadMap] = useState<Record<string, string>>({});
   const [editingMeta, setEditingMeta] = useState<{ studentName?: string; feeHeadName?: string } | null>(null);
-  const structureOptions: SelectOption[] = structures.map((s) => ({
-    value: s.id,
-    label: `${s.feeName ?? "Fee"}${s.className ? ` - ${s.className}${s.sectionName ? `-${s.sectionName}` : ""}` : ""} (Rs ${s.amount})`,
-  }));
+  const structureOptions: SelectOption[] = structures.map((s) => {
+    const fullName = feeHeadMap[s.feeHeadId] || s.feeName || "Fee";
+    return {
+      value: s.id,
+      label: `${fullName}${s.className ? ` - ${s.className}${s.sectionName ? `-${s.sectionName}` : ""}` : ""} (Rs ${s.amount})`,
+    };
+  });
 
   const [studentId, setStudentId] = useState("");
   const [feeStructureId, setFeeStructureId] = useState("");
@@ -179,7 +184,9 @@ export function ConcessionFormScreen({ navigation, route }: FormProps) {
 
   const loadStructures = useCallback(async () => {
     try {
-      setStructures(await getFeeStructures());
+      const [structureList, heads] = await Promise.all([getFeeStructures(), getFeeHeads()]);
+      setStructures(structureList);
+      setFeeHeadMap(Object.fromEntries(heads.map((h) => [h.id, h.feeName])));
     } catch {
       setStructures([]);
     }

@@ -18,6 +18,18 @@ import { FeePaymentsScreen, FeePaymentFormScreen } from "../screens/staff/FeePay
 import { FeePaymentLinksScreen } from "../screens/staff/FeePaymentLinksScreen";
 import { StudentFeeSummaryScreen } from "../screens/staff/StudentFeeSummaryScreen";
 import { PendingFeesScreen } from "../screens/staff/PendingFeesScreen";
+import { PaymentSettingsScreen } from "../screens/staff/PaymentSettingsScreen";
+import { TransportRoutesScreen } from "../screens/transport/TransportRoutesScreen";
+import { TransportRouteFormScreen } from "../screens/transport/TransportRouteFormScreen";
+import { StudentTransportScreen } from "../screens/transport/StudentTransportScreen";
+import { StudentAssignFormScreen } from "../screens/transport/StudentAssignFormScreen";
+import { VehiclesScreen } from "../screens/transport/VehiclesScreen";
+import { VehicleFormScreen } from "../screens/transport/VehicleFormScreen";
+import { VehicleAssignmentsScreen } from "../screens/transport/VehicleAssignmentsScreen";
+import { VehicleAssignmentFormScreen } from "../screens/transport/VehicleAssignmentFormScreen";
+import { TransportFeesScreen } from "../screens/transport/TransportFeesScreen";
+import { TransportFeeFormScreen } from "../screens/transport/TransportFeeFormScreen";
+import { LiveTrackingScreen } from "../screens/transport/LiveTrackingScreen";
 import { MarkAttendanceScreen } from "../screens/staff/MarkAttendanceScreen";
 import { AttendanceReportScreen } from "../screens/staff/AttendanceReportScreen";
 import { StaffAttendanceScreen } from "../screens/staff/StaffAttendanceScreen";
@@ -112,6 +124,7 @@ function FeesNavigator() {
       <FeesStack.Screen name="FeePaymentLinks" component={FeePaymentLinksScreen} options={{ title: "Fee Payment Links" }} />
       <FeesStack.Screen name="StudentFeeSummary" component={StudentFeeSummaryScreen} options={{ title: "Student Fee Summary" }} />
       <FeesStack.Screen name="PendingFees" component={PendingFeesScreen} options={{ title: "Pending Fees" }} />
+      <FeesStack.Screen name="PaymentSettings" component={PaymentSettingsScreen} options={{ title: "Payment Settings" }} />
     </FeesStack.Navigator>
   );
 }
@@ -165,6 +178,17 @@ function MoreNavigator() {
       <MoreStack.Screen name="StaffDirectory" component={StaffDirectoryScreen} options={{ title: "Staff directory" }} />
       <MoreStack.Screen name="StaffForm" component={StaffFormScreen} options={{ title: "Add staff member" }} />
       <MoreStack.Screen name="Profile" component={ProfileScreen} options={{ title: "Profile" }} />
+      <MoreStack.Screen name="TransportRoutes" component={TransportRoutesScreen} options={{ title: "Transport Routes" }} />
+      <MoreStack.Screen name="TransportRouteForm" component={TransportRouteFormScreen} options={{ title: "Transport route" }} />
+      <MoreStack.Screen name="StudentTransport" component={StudentTransportScreen} options={{ title: "Student Transport" }} />
+      <MoreStack.Screen name="StudentAssignForm" component={StudentAssignFormScreen} options={{ title: "Assign student" }} />
+      <MoreStack.Screen name="Vehicles" component={VehiclesScreen} options={{ title: "Vehicles" }} />
+      <MoreStack.Screen name="VehicleForm" component={VehicleFormScreen} options={{ title: "Vehicle" }} />
+      <MoreStack.Screen name="VehicleAssignments" component={VehicleAssignmentsScreen} options={{ title: "Vehicle Assignments" }} />
+      <MoreStack.Screen name="VehicleAssignmentForm" component={VehicleAssignmentFormScreen} options={{ title: "Assign vehicle" }} />
+      <MoreStack.Screen name="TransportFees" component={TransportFeesScreen} options={{ title: "Transport Fees" }} />
+      <MoreStack.Screen name="TransportFeeForm" component={TransportFeeFormScreen} options={{ title: "Transport fee" }} />
+      <MoreStack.Screen name="LiveTracking" component={LiveTrackingScreen} options={{ title: "Live Tracking" }} />
     </MoreStack.Navigator>
   );
 }

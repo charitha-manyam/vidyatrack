@@ -2,14 +2,14 @@ import { useCallback, useMemo, useState } from "react";
 import { FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Feather } from "@expo/vector-icons";
 import { Screen } from "../../components/Screen";
 import { Card } from "../../components/Card";
-import { ListRow } from "../../components/ListRow";
-import { StatTile } from "../../components/StatTile";
-import { Badge } from "../../components/ui/Badge";
+import { Badge, type BadgeTone } from "../../components/ui/Badge";
 import { DataState } from "../../components/DataState";
 import { Button } from "../../components/Button";
 import { InlineSelect } from "../../components/InlineSelect";
+import { DateInput } from "../../components/DateInput";
 import { PermissionGate } from "../../components/PermissionGate";
 import { MODULES } from "../../config/rbac";
 import { getPendingFeesBreakdown } from "../../api/fees.api";
@@ -17,7 +17,7 @@ import { getErrorMessage } from "../../lib/errors";
 import { useSelectOptions, sectionsFor } from "../../hooks/useSelectOptions";
 import { colors } from "../../theme/colors";
 import type { FeesStackParamList } from "../../navigation/types";
-import type { PendingFeeBreakdownItem, PendingFeeTotals } from "../../types/fees";
+import type { PendingFeeBreakdownItem } from "../../types/fees";
 
 type Props = NativeStackScreenProps<FeesStackParamList, "PendingFees">;
 
@@ -25,12 +25,20 @@ function formatINR(value: number) {
   return `Rs ${new Intl.NumberFormat("en-IN").format(Math.round(value || 0))}`;
 }
 
+function statusTone(status?: string): BadgeTone {
+  const s = String(status ?? "").toUpperCase();
+  if (s === "PAID") return "green";
+  if (s === "PARTIAL") return "amber";
+  return "red";
+}
+
 export function PendingFeesScreen(_: Props) {
   const { options } = useSelectOptions(["classes", "sections"]);
   const [classId, setClassId] = useState("");
   const [sectionId, setSectionId] = useState("");
+  const [dueFrom, setDueFrom] = useState("");
+  const [dueTo, setDueTo] = useState("");
   const [items, setItems] = useState<PendingFeeBreakdownItem[]>([]);
-  const [totals, setTotals] = useState<PendingFeeTotals | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<PendingFeeBreakdownItem[] | null>(null);
@@ -41,7 +49,6 @@ export function PendingFeesScreen(_: Props) {
     try {
       const res = await getPendingFeesBreakdown();
       setItems(res.items);
-      setTotals(res.totals);
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -59,19 +66,18 @@ export function PendingFeesScreen(_: Props) {
   const classLabel = (options.classes ?? []).find((o) => o.value === classId)?.label;
   const sectionLabel = sections.find((o) => o.value === sectionId)?.label;
 
-  const filtered = useMemo(
-    () =>
-      items.filter(
-        (i) =>
-          (!classId || !classLabel || i.className === classLabel) &&
-          (!sectionId || !sectionLabel || i.sectionName === sectionLabel)
-      ),
-    [items, classId, classLabel, sectionId, sectionLabel]
-  );
+  const inDateRange = (d: string | undefined) => {
+    if (!dueFrom && !dueTo) return true;
+    if (!d) return false;
+    return (!dueFrom || d >= dueFrom) && (!dueTo || d <= dueTo);
+  };
 
   const studentRows = useMemo(() => {
     const map = new Map<string, PendingFeeBreakdownItem[]>();
-    for (const item of filtered) {
+    for (const item of items) {
+      if (classLabel && item.className !== classLabel) continue;
+      if (sectionLabel && item.sectionName !== sectionLabel) continue;
+      if (!inDateRange(item.dueDate)) continue;
       const key = item.studentId;
       const list = map.get(key) ?? [];
       list.push(item);
@@ -82,10 +88,15 @@ export function PendingFeesScreen(_: Props) {
       studentName: entries[0].studentName,
       className: entries[0].className,
       sectionName: entries[0].sectionName,
+      assigned: entries.reduce((sum, e) => sum + (e.originalAmount || 0), 0),
+      paid: entries.reduce((sum, e) => sum + (e.paidAmount || 0), 0),
       balance: entries.reduce((sum, e) => sum + (e.balanceAmount || 0), 0),
       entries,
     }));
-  }, [filtered]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, classLabel, sectionLabel, dueFrom, dueTo]);
+
+  const totalPending = studentRows.reduce((sum, r) => sum + r.balance, 0);
 
   return (
     <PermissionGate module={MODULES.FEES} action="read">
@@ -97,7 +108,9 @@ export function PendingFeesScreen(_: Props) {
             keyboardShouldPersistTaps="handled"
           >
             <Text style={styles.pageTitle}>Pending Fees</Text>
-            <Text style={styles.description}>Assignment-level dues across the school.</Text>
+            <Text style={styles.description}>
+              Every student with a pending balance across their assigned fees and transport fees.
+            </Text>
 
             <View style={styles.filtersRow}>
               <View style={styles.filter}>
@@ -122,13 +135,21 @@ export function PendingFeesScreen(_: Props) {
                 />
               </View>
             </View>
-
-            {totals ? (
-              <View style={styles.grid}>
-                <StatTile label="Total pending" value={formatINR(totals.totalPendingAmount)} tone="danger" />
-                <StatTile label="Students" value={totals.totalStudents} tone="warning" />
+            <View style={styles.filtersRow}>
+              <View style={styles.filter}>
+                <DateInput label="Due from" value={dueFrom} onChangeDate={setDueFrom} />
               </View>
-            ) : null}
+              <View style={styles.filter}>
+                <DateInput label="Due to" value={dueTo} onChangeDate={setDueTo} />
+              </View>
+            </View>
+
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryCount}>
+                {studentRows.length} student{studentRows.length === 1 ? "" : "s"} with pending fees
+              </Text>
+              <Text style={styles.summaryTotal}>Total pending: {formatINR(totalPending)}</Text>
+            </View>
 
             <DataState
               loading={loading}
@@ -143,14 +164,35 @@ export function PendingFeesScreen(_: Props) {
                 scrollEnabled={false}
                 removeClippedSubviews={false}
                 renderItem={({ item }) => (
-                  <ListRow
-                    title={item.studentName}
-                    subtitle={`${item.className ?? ""}${item.className && item.sectionName ? " - " : ""}${item.sectionName ?? ""} · ${item.entries.length} fee${item.entries.length > 1 ? "s" : ""}`}
-                    meta={formatINR(item.balance)}
-                    tone="danger"
-                    chevron
-                    onPress={() => setSelectedStudent(item.entries)}
-                  />
+                  <Pressable style={styles.studentRow} onPress={() => setSelectedStudent(item.entries)}>
+                    <View style={styles.studentHeader}>
+                      <View style={styles.studentIdWrap}>
+                        <Text style={styles.studentName} numberOfLines={1}>
+                          {item.studentName ?? "Student"}
+                        </Text>
+                        <Text style={styles.studentClass} numberOfLines={1}>
+                          {item.className ?? ""}
+                          {item.className && item.sectionName ? " - " : ""}
+                          {item.sectionName ?? ""}
+                        </Text>
+                      </View>
+                      <Feather name="chevron-right" size={18} color={colors.inkGhost} />
+                    </View>
+                    <View style={styles.studentTable}>
+                      <View style={styles.studentCell}>
+                        <Text style={styles.studentLabel}>Assigned</Text>
+                        <Text style={styles.studentValue}>{formatINR(item.assigned)}</Text>
+                      </View>
+                      <View style={styles.studentCell}>
+                        <Text style={styles.studentLabel}>Paid</Text>
+                        <Text style={styles.studentValue}>{formatINR(item.paid)}</Text>
+                      </View>
+                      <View style={styles.studentCell}>
+                        <Text style={styles.studentLabel}>Pending</Text>
+                        <Text style={[styles.studentValue, { color: colors.danger }]}>{formatINR(item.balance)}</Text>
+                      </View>
+                    </View>
+                  </Pressable>
                 )}
               />
             </DataState>
@@ -181,20 +223,17 @@ export function PendingFeesScreen(_: Props) {
               {selectedStudent?.map((entry) => (
                 <Card key={`${entry.studentId}-${entry.feeStructureId}-${entry.feeHeadName}`} style={styles.feeCard}>
                   <View style={styles.feeHeader}>
-                    <Text style={styles.feeName}>{entry.feeHeadName || "Fee"}</Text>
-                    {entry.dueDate ? <Badge tone="gray">Due {entry.dueDate}</Badge> : null}
+                    <Text style={styles.feeName} numberOfLines={1}>
+                      {entry.feeHeadName || "Fee"}
+                    </Text>
+                    <Badge tone={statusTone(entry.status)}>{(entry.status ?? "PENDING").toUpperCase()}</Badge>
                   </View>
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Original</Text>
-                    <Text style={styles.infoValue}>{formatINR(entry.originalAmount)}</Text>
-                  </View>
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Paid</Text>
-                    <Text style={styles.infoValue}>{formatINR(entry.paidAmount)}</Text>
-                  </View>
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Balance</Text>
-                    <Text style={[styles.infoValue, { color: colors.danger }]}>{formatINR(entry.balanceAmount)}</Text>
+                  <Text style={styles.feeMeta} numberOfLines={1}>
+                    Fee{entry.dueDate ? ` · Due ${entry.dueDate}` : ""}
+                  </Text>
+                  <View style={styles.feeBody}>
+                    <Text style={styles.feeDue}>Rs {Number(entry.balanceAmount || 0).toLocaleString("en-IN")} due</Text>
+                    <Text style={styles.feeOf}>of Rs {Number(entry.originalAmount || 0).toLocaleString("en-IN")}</Text>
                   </View>
                 </Card>
               ))}
@@ -217,8 +256,33 @@ const styles = StyleSheet.create({
   description: { fontSize: 13, lineHeight: 19, color: colors.inkFaint },
   filtersRow: { flexDirection: "row", gap: 10 },
   filter: { flex: 1 },
-  grid: { flexDirection: "row", gap: 12 },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: 10,
+    padding: 12,
+  },
+  summaryCount: { fontSize: 13, color: colors.inkSoft },
+  summaryTotal: { fontSize: 13, fontWeight: "700", color: colors.ink },
   list: { gap: 8 },
+  studentRow: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 12,
+    padding: 14,
+    gap: 10,
+  },
+  studentHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
+  studentIdWrap: { flex: 1, gap: 2 },
+  studentName: { fontSize: 15, fontWeight: "600", color: colors.ink },
+  studentClass: { fontSize: 13, color: colors.inkFaint },
+  studentTable: { flexDirection: "row", gap: 8, paddingTop: 2 },
+  studentCell: { flex: 1, gap: 2 },
+  studentLabel: { fontSize: 11, color: colors.inkFaint },
+  studentValue: { fontSize: 13, fontWeight: "600", color: colors.ink },
   modalBackdrop: {
     flex: 1,
     backgroundColor: "rgba(15, 23, 42, 0.45)",
@@ -234,23 +298,24 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 18, fontWeight: "700", color: colors.ink },
   modalSubtitle: { fontSize: 13, color: colors.inkFaint, marginTop: 2 },
   modalContent: { padding: 18, gap: 10 },
-  feeCard: { padding: 12, gap: 0 },
+  feeCard: { padding: 12, gap: 4 },
   feeHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 2,
+    gap: 8,
   },
   feeName: { fontSize: 14, fontWeight: "600", color: colors.ink, flex: 1, marginRight: 8 },
-  infoRow: {
+  feeMeta: { fontSize: 12, color: colors.inkFaint },
+  feeBody: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 6,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.line,
+    paddingTop: 6,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.line,
   },
-  infoLabel: { fontSize: 13, color: colors.inkSoft },
-  infoValue: { fontSize: 13, fontWeight: "500", color: colors.ink },
+  feeDue: { fontSize: 14, fontWeight: "700", color: colors.danger },
+  feeOf: { fontSize: 13, color: colors.inkSoft },
   modalFooter: { padding: 18, paddingTop: 6 },
 });

@@ -64,5 +64,11 @@ export function StudentPicker({
 }
 
 const styles = StyleSheet.create({
-  cascade: { gap: 10, backgroundColor: colors.surfaceMuted, padding: 12, borderRadius: 12 },
+  cascade: {
+    gap: 8,
+    backgroundColor: colors.surfaceMuted,
+    paddingVertical: 12,
+    paddingHorizontal: 0,
+    borderRadius: 12,
+  },
 });

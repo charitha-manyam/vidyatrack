@@ -16,7 +16,7 @@ const API_URL_BY_ROLE: Record<ApiRole, string> = {
   marketing: process.env.EXPO_PUBLIC_MARKETING_API_URL ?? FALLBACK_API_URL,
 };
 
-export const apiClient = axios.create({ baseURL: FALLBACK_API_URL });
+export const apiClient = axios.create({ baseURL: FALLBACK_API_URL, timeout: 15000 });
 
 export function getApiBaseUrlForRole(role?: ApiRole) {
   return role ? API_URL_BY_ROLE[role] : FALLBACK_API_URL;
@@ -37,6 +37,13 @@ let currentToken: string | null = null;
 
 export function setAuthToken(token: string | null) {
   currentToken = token;
+}
+
+// Read-only accessor for code that needs to inspect the JWT claims (e.g.
+// deriving the school's organization_id for /organization routes) without
+// threading the token through React props.
+export function getAuthToken(): string | null {
+  return currentToken;
 }
 
 apiClient.interceptors.request.use((config) => {

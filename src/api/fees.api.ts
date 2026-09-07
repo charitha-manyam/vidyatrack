@@ -6,6 +6,7 @@ import type {
   FeePayment,
   FeePaymentLink,
   FeeStructure,
+  FeeSummaryDetail,
   PendingFeeBreakdownItem,
   PendingFeeTotals,
   StudentFeeAssignment,
@@ -200,8 +201,13 @@ export async function getPaymentLinksByStudent(studentId: string): Promise<FeePa
   return rowsOf<FeePaymentLink>(res, ["links", "paymentLinks"]);
 }
 
-export async function createPaymentLink(values: { studentId: string; fee_type_id: string; expiresInHours?: number }) {
-  const res = await apiClient.post<ApiResponse<FeePaymentLink>>("/tenant/createpaymentlink", values);
+export async function createPaymentLink(values: { studentId: string; fee_type_id: string; expiresInHours?: number; amount?: number }) {
+  const res = await apiClient.post<ApiResponse<FeePaymentLink>>("/tenant/createpaymentlink", {
+    student_id: values.studentId,
+    feeHeadMappingId: values.fee_type_id,
+    expiresInHours: values.expiresInHours,
+    amount: values.amount,
+  });
   return unwrap(res);
 }
 
@@ -211,24 +217,97 @@ export async function cancelPaymentLink(id: string) {
 }
 
 // ---------------- Summaries ----------------
+function numOf(v: unknown): number {
+  const n = Number(v ?? 0);
+  return isFinite(n) ? n : 0;
+}
+
+// The backend wraps the summary as { student, summary: { totalOriginal,
+// totalDiscount, totalFinal, totalPaid, totalDue, overallStatus }, details }
+// but the field names vary across versions. Normalise into the local shape the
+// UI expects so stat cards and the fee-details table always render.
 export async function getStudentFeeSummary(studentId: string): Promise<StudentFeeSummary | undefined> {
-  const res = await apiClient.get<ApiResponse<StudentFeeSummary>>(`/tenant/getstudentfeesummary/${studentId}`);
-  return unwrap(res);
+  const res = await apiClient.get<ApiResponse<unknown>>(`/tenant/getstudentfeesummary/${studentId}`);
+  const raw: unknown = res.data?.data;
+  if (!raw || typeof raw !== "object") return undefined;
+  const obj = raw as Record<string, unknown>;
+  const summaryObj =
+    obj.summary && typeof obj.summary === "object" ? (obj.summary as Record<string, unknown>) : obj;
+
+  const detailList: Record<string, unknown>[] = Array.isArray(obj.details)
+    ? (obj.details as Record<string, unknown>[])
+    : Array.isArray(obj.feeDetails)
+      ? (obj.feeDetails as Record<string, unknown>[])
+      : [];
+
+  const details: FeeSummaryDetail[] = detailList.map((d) => ({
+    fee_structure:
+      (d.fee_structure as string) ?? (d.feeMappingId as string) ?? (d.feeStructureId as string) ?? undefined,
+    fee_name: (d.fee_name as string) ?? (d.feeHeadName as string) ?? (d.feeName as string) ?? undefined,
+    type: (d.type as string) ?? undefined,
+    originalAmount: numOf(d.originalAmount),
+    discountAmount: numOf(d.discountAmount),
+    finalAmount: numOf(d.finalAmount),
+    paidAmount: numOf(d.paidAmount),
+    dueAmount: numOf(d.dueAmount),
+    status: (d.status as string) ?? undefined,
+    billingCycle: (d.billingCycle as string) ?? undefined,
+    dueDate: (d.dueDate as string) ?? (d.due_date as string) ?? undefined,
+  }));
+
+  return {
+    student_name: (obj.student_name as string) ?? ((obj.student as Record<string, unknown>)?.name as string) ?? undefined,
+    class_name: (obj.class_name as string) ?? ((obj.student as Record<string, unknown>)?.className as string) ?? undefined,
+    section_name: (obj.section_name as string) ?? ((obj.student as Record<string, unknown>)?.sectionName as string) ?? undefined,
+    totalOriginalAmount: numOf(summaryObj.totalOriginalAmount ?? summaryObj.totalOriginal),
+    totalDiscountAmount: numOf(summaryObj.totalDiscountAmount ?? summaryObj.totalDiscount),
+    totalPaidAmount: numOf(summaryObj.totalPaidAmount ?? summaryObj.totalPaid),
+    totalBalanceAmount: numOf(summaryObj.totalBalanceAmount ?? summaryObj.totalDue),
+    details,
+  };
 }
 
 export async function getPendingFeesBreakdown(): Promise<{
   items: PendingFeeBreakdownItem[];
   totals: PendingFeeTotals;
 }> {
-  const res = await apiClient.get<ApiResponse<PendingFeeBreakdownItem[]>>("/tenant/getallpendingsummary");
+  const res = await apiClient.get<Record<string, unknown>>("/tenant/getallpendingsummary");
   const raw: unknown = res.data;
   const obj = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
-  const arr = Array.isArray(raw) ? raw : Array.isArray(obj.data) ? (obj.data as PendingFeeBreakdownItem[]) : rowsOf<PendingFeeBreakdownItem>(res, ["items", "summary"]);
+  const students = Array.isArray(obj.data) ? (obj.data as Record<string, unknown>[]) : [];
+  const items: PendingFeeBreakdownItem[] = [];
+  for (const student of students) {
+    const breakdown = Array.isArray(student.feeBreakdown)
+      ? (student.feeBreakdown as Record<string, unknown>[])
+      : [];
+    const base = {
+      studentId: (student.studentId as string) ?? "",
+      studentName: (student.studentName as string) ?? "Student",
+      className: (student.className as string) ?? undefined,
+      sectionName: (student.sectionName as string) ?? undefined,
+    };
+    for (const line of breakdown) {
+      items.push({
+        ...base,
+        feeHeadName: (line.feeHeadName as string) ?? undefined,
+        feeStructureId:
+          (line.feeStructureId as string) ??
+          (line.feeMappingId as string) ??
+          (line.feeHeadMappingId as string) ??
+          undefined,
+        originalAmount: numOf(line.originalAmount),
+        paidAmount: numOf(line.paidAmount),
+        balanceAmount: numOf(line.dueAmount ?? line.balanceAmount),
+        dueDate: (line.dueDate as string) ?? undefined,
+        status: (line.status as string) ?? "PENDING",
+      });
+    }
+  }
   return {
-    items: arr,
+    items,
     totals: {
-      totalPendingAmount: Number(obj.totalPendingAmount ?? obj.totalPending ?? 0),
-      totalStudents: Number(obj.totalStudents ?? (Array.isArray(obj.students) ? obj.students.length : 0)),
+      totalPendingAmount: numOf(obj.totalPendingAmount),
+      totalStudents: numOf(obj.totalStudentsWithPendingFees),
     },
   };
 }

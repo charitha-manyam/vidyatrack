@@ -9,7 +9,6 @@ import { Input } from "../../components/Input";
 import { DateInput } from "../../components/DateInput";
 import { Badge } from "../../components/ui/Badge";
 import { DataState } from "../../components/DataState";
-import { InlineSelect } from "../../components/InlineSelect";
 import { StudentPicker } from "../../components/StudentPicker";
 import { PermissionGate, staffPermissions } from "../../components/PermissionGate";
 import { useAuth } from "../../context/AuthContext";
@@ -25,7 +24,6 @@ import { getErrorMessage } from "../../lib/errors";
 import { colors } from "../../theme/colors";
 import type { FeesStackParamList } from "../../navigation/types";
 import type { FeePayment } from "../../types/fees";
-import { PAYMENT_MODE_OPTIONS } from "../../types/fees";
 
 // ---------------- List ----------------
 type ListProps = NativeStackScreenProps<FeesStackParamList, "FeePayments">;
@@ -38,6 +36,12 @@ export function FeePaymentsScreen({ navigation }: ListProps) {
   const [items, setItems] = useState<FeePayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  const query = search.trim().toLowerCase();
+  const visibleItems = query
+    ? items.filter((item) => (item.studentName ?? "").toLowerCase().includes(query))
+    : items;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -56,21 +60,6 @@ export function FeePaymentsScreen({ navigation }: ListProps) {
       load();
     }, [load])
   );
-
-  useLayoutEffect(() => {
-    if (canWrite) {
-      navigation.setOptions({
-        headerRight: () => (
-          <Button
-            title="+ Add"
-            variant="secondary"
-            onPress={() => navigation.navigate("FeePaymentForm", undefined)}
-            style={styles.headerBtn}
-          />
-        ),
-      });
-    }
-  }, [canWrite, navigation]);
 
   function confirmDelete(item: FeePayment) {
     Alert.alert("Delete payment record?", `Rs ${item.amount} from ${item.studentName ?? ""} will be removed.`, [
@@ -96,14 +85,33 @@ export function FeePaymentsScreen({ navigation }: ListProps) {
         <View style={styles.container}>
           <Text style={styles.pageTitle}>Fee Payments</Text>
           <Text style={styles.description}>Recorded collections against student fees.</Text>
+          <Input
+            placeholder="Search student name"
+            value={search}
+            onChangeText={setSearch}
+            style={styles.search}
+          />
+          {canWrite ? (
+            <Button
+              title="Record payment"
+              onPress={() => navigation.navigate("FeePaymentForm", undefined)}
+              style={styles.recordBtn}
+            />
+          ) : null}
           <DataState
             loading={loading}
             error={error}
             retry={load}
-            empty={items.length === 0 ? "No payment records yet — tap Add." : null}
+            empty={
+              items.length === 0
+                ? "No payment records yet — tap Record payment."
+                : visibleItems.length === 0
+                  ? "No students match your search."
+                  : null
+            }
           >
             <View style={styles.list}>
-              {items.map((item) => (
+              {visibleItems.map((item) => (
                 <Card key={item.id} style={styles.card}>
                   <View style={styles.cardHeader}>
                     <Text style={styles.cardTitle} numberOfLines={1}>
@@ -265,12 +273,7 @@ export function FeePaymentFormScreen({ navigation, route }: FormProps) {
             studentId={studentId}
             onStudentChange={setStudentId}
           />
-          <InlineSelect
-            label="Payment mode"
-            value={paymentMode}
-            options={PAYMENT_MODE_OPTIONS}
-            onSelect={setPaymentMode}
-          />
+          <Input label="Payment mode" value={paymentMode} onChangeText={setPaymentMode} />
           <Input label="Amount (Rs)" value={amount} onChangeText={setAmount} keyboardType="numeric" />
           <Input label="To pay (Rs, instalment)" value={topay} onChangeText={setTopay} keyboardType="numeric" />
           <Input label="Receipt no." value={receiptNo} onChangeText={setReceiptNo} />
@@ -295,7 +298,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 14 },
   pageTitle: { fontSize: 22, fontWeight: "700", color: colors.ink, marginBottom: 4 },
   description: { fontSize: 13, lineHeight: 19, color: colors.inkFaint, marginBottom: 12 },
-  headerBtn: { marginRight: 8 },
+  search: { marginBottom: 12 },
+  recordBtn: { marginBottom: 12 },
   list: { gap: 10 },
   card: { padding: 14, gap: 6 },
   cardHeader: {

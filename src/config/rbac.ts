@@ -102,7 +102,13 @@ export type MoreScreen =
   | "Leaves"
   | "LeaveAllocations"
   | "Payslips"
-  | "ModulePlaceholder";
+  | "ModulePlaceholder"
+  | "TransportRoutes"
+  | "StudentTransport"
+  | "Vehicles"
+  | "VehicleAssignments"
+  | "LiveTracking"
+  | "TransportFees";
 
 const DESTINATION_MAP: Record<string, MobileDestination> = {
   "/classes": { kind: "classesList" },
@@ -133,8 +139,13 @@ const DESTINATION_MAP: Record<string, MobileDestination> = {
   "/fees/concessions": { kind: "fees", screen: "Concessions" },
   "/fees/payments": { kind: "fees", screen: "FeePayments" },
   "/fees/payment-links": { kind: "fees", screen: "FeePaymentLinks" },
-  "/transport/routes": { kind: "resource", resourceId: "transport-routes" },
-  "/transport/assignments": { kind: "resource", resourceId: "student-transport" },
+  "/fees/payment-settings": { kind: "fees", screen: "PaymentSettings" },
+  "/transport/routes": { kind: "more", screen: "TransportRoutes" },
+  "/transport/assignments": { kind: "more", screen: "StudentTransport" },
+  "/transport/vehicles": { kind: "more", screen: "Vehicles" },
+  "/transport/vehicle-assignments": { kind: "more", screen: "VehicleAssignments" },
+  "/transport/live-tracking": { kind: "more", screen: "LiveTracking" },
+  "/transport/fees": { kind: "more", screen: "TransportFees" },
 };
 
 export function resolveMobileDestination(path: string): MobileDestination {

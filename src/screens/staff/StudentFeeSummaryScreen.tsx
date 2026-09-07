@@ -4,7 +4,6 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Screen } from "../../components/Screen";
 import { Card } from "../../components/Card";
 import { StatTile } from "../../components/StatTile";
-import { Badge, type BadgeTone } from "../../components/ui/Badge";
 import { DataState } from "../../components/DataState";
 import { StudentPicker } from "../../components/StudentPicker";
 import { PermissionGate } from "../../components/PermissionGate";
@@ -18,12 +17,12 @@ import type { StudentFeeSummary } from "../../types/fees";
 
 type Props = NativeStackScreenProps<FeesStackParamList, "StudentFeeSummary">;
 
-function detailTone(status?: string): BadgeTone {
+function detailToneColor(status?: string): string {
   const s = String(status ?? "").toUpperCase();
-  if (s === "PAID") return "green";
-  if (s === "PARTIAL") return "amber";
-  if (s === "PENDING") return "red";
-  return "gray";
+  if (s === "PAID") return "#15803d";
+  if (s === "PARTIAL") return "#b45309";
+  if (s === "PENDING") return colors.danger;
+  return colors.inkSoft;
 }
 
 export function StudentFeeSummaryScreen(_: Props) {
@@ -55,6 +54,11 @@ export function StudentFeeSummaryScreen(_: Props) {
   }, [studentId, load]);
 
   const details = summary?.details ?? [];
+  const totalOriginal = Number(summary?.totalOriginalAmount || 0);
+  const totalDiscount = Number(summary?.totalDiscountAmount || 0);
+  const totalPaid = Number(summary?.totalPaidAmount || 0);
+  const totalDue = Number(summary?.totalBalanceAmount || 0);
+  const totalFinal = totalPaid + totalDue;
 
   return (
     <PermissionGate module={MODULES.FEES} action="read">
@@ -91,47 +95,84 @@ export function StudentFeeSummaryScreen(_: Props) {
                   {[summary.class_name, summary.section_name].filter(Boolean).join(" - ")}
                 </Text>
 
-                <View style={styles.grid}>
-                  <StatTile label="Billed" value={`Rs ${Number(summary.totalOriginalAmount || 0).toLocaleString("en-IN")}`} tone="neutral" />
-                  <StatTile label="Discount" value={`Rs ${Number(summary.totalDiscountAmount || 0).toLocaleString("en-IN")}`} tone="success" />
-                  <StatTile label="Paid" value={`Rs ${Number(summary.totalPaidAmount || 0).toLocaleString("en-IN")}`} tone="brand" />
-                  <StatTile label="Balance" value={`Rs ${Number(summary.totalBalanceAmount || 0).toLocaleString("en-IN")}`} tone={Number(summary.totalBalanceAmount || 0) > 0 ? "danger" : "success"} />
+                <View style={styles.statRow}>
+                  <View style={styles.statCol}>
+                    <StatTile label="Original" value={`Rs ${totalOriginal.toLocaleString("en-IN")}`} tone="neutral" />
+                  </View>
+                  <View style={styles.statCol}>
+                    <StatTile label="Discount" value={`Rs ${totalDiscount.toLocaleString("en-IN")}`} tone="success" />
+                  </View>
+                  <View style={styles.statCol}>
+                    <StatTile label="Final" value={`Rs ${totalFinal.toLocaleString("en-IN")}`} tone="brand" />
+                  </View>
+                </View>
+                <View style={styles.statRow}>
+                  <View style={styles.statCol}>
+                    <StatTile label="Paid" value={`Rs ${totalPaid.toLocaleString("en-IN")}`} tone="warning" />
+                  </View>
+                  <View style={styles.statCol}>
+                    <StatTile label="Due" value={`Rs ${totalDue.toLocaleString("en-IN")}`} tone={totalDue > 0 ? "danger" : "success"} />
+                  </View>
                 </View>
 
                 <Text style={styles.sectionTitle}>Fee details</Text>
                 {details.length === 0 ? (
                   <Text style={styles.smallHint}>No fee details on record.</Text>
                 ) : (
-                  <View style={styles.list}>
+                  <View style={styles.detailList}>
                     {details.map((d, i) => (
-                      <Card key={`${d.fee_structure}-${i}`} style={styles.card}>
-                        <View style={styles.cardHeader}>
-                          <Text style={styles.cardTitle} numberOfLines={1}>
+                      <Card key={`${d.fee_structure}-${i}`} style={styles.detailCard}>
+                        <View style={styles.detailHeader}>
+                          <Text style={styles.detailTitle} numberOfLines={1}>
                             {d.fee_name ?? d.fee_structure ?? "Fee"}
                           </Text>
-                          <Badge tone={detailTone(d.status)}>{d.status ?? "PENDING"}</Badge>
-                        </View>
-                        {d.billingCycle || d.dueDate ? (
-                          <Text style={styles.cardSubtitle} numberOfLines={1}>
-                            {[d.billingCycle ? d.billingCycle.replace("_", " ") : "", d.dueDate ? `due ${d.dueDate}` : ""]
-                              .filter(Boolean)
-                              .join(" · ")}
-                          </Text>
-                        ) : null}
-                        <View style={styles.infoRow}>
-                          <Text style={styles.infoLabel}>Original</Text>
-                          <Text style={styles.infoValue}>{`Rs ${Number(d.originalAmount || 0).toLocaleString("en-IN")}`}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                          <Text style={styles.infoLabel}>Discount</Text>
-                          <Text style={styles.infoValue}>{`Rs ${Number(d.discountAmount || 0).toLocaleString("en-IN")}`}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                          <Text style={styles.infoLabel}>Balance</Text>
-                          <Text style={[styles.infoValue, Number(d.dueAmount || 0) > 0 && { color: colors.danger }]}>
-                            {`Rs ${Number(d.dueAmount || 0).toLocaleString("en-IN")}`}
+                          <Text style={[styles.detailStatus, { color: detailToneColor(d.status) }]}>
+                            {d.status ?? "PENDING"}
                           </Text>
                         </View>
+                        <View style={styles.detailBlock}>
+                          <View style={styles.detailCell}>
+                            <Text style={styles.detailLabel}>Original</Text>
+                            <Text style={styles.detailValue}>
+                              {Number(d.originalAmount || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                            </Text>
+                          </View>
+                          <View style={styles.detailCell}>
+                            <Text style={styles.detailLabel}>Discount</Text>
+                            <Text style={styles.detailValue}>
+                              {Number(d.discountAmount || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                            </Text>
+                          </View>
+                          <View style={styles.detailCell}>
+                            <Text style={styles.detailLabel}>Final</Text>
+                            <Text style={styles.detailValue}>
+                              {Number(d.finalAmount || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                            </Text>
+                          </View>
+                        </View>
+                        <View style={styles.detailBlock}>
+                          <View style={styles.detailCell}>
+                            <Text style={styles.detailLabel}>Paid</Text>
+                            <Text style={styles.detailValue}>
+                              {Number(d.paidAmount || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                            </Text>
+                          </View>
+                          <View style={styles.detailCell}>
+                            <Text style={styles.detailLabel}>Due</Text>
+                            <Text style={[styles.detailValue, Number(d.dueAmount || 0) > 0 && { color: colors.danger }]}>
+                              {Number(d.dueAmount || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                            </Text>
+                          </View>
+                          <View style={styles.detailCell}>
+                            <Text style={styles.detailLabel}>Due date</Text>
+                            <Text style={styles.detailValue} numberOfLines={1}>
+                              {d.dueDate ?? "—"}
+                            </Text>
+                          </View>
+                        </View>
+                        <Text style={styles.detailMeta}>
+                          Type: {(d.type ?? d.billingCycle ?? "—").replace("_", " ")}
+                        </Text>
                       </Card>
                     ))}
                   </View>
@@ -152,27 +193,23 @@ const styles = StyleSheet.create({
   description: { fontSize: 13, lineHeight: 19, color: colors.inkFaint },
   studentName: { fontSize: 17, fontWeight: "700", color: colors.ink },
   studentClass: { fontSize: 13, color: colors.inkFaint },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  statRow: { flexDirection: "row", gap: 8 },
+  statCol: { flex: 1 },
   sectionTitle: { fontSize: 15, fontWeight: "600", color: colors.ink, marginTop: 4 },
   smallHint: { fontSize: 12, color: colors.inkFaint, lineHeight: 17 },
-  list: { gap: 10 },
-  card: { padding: 14, gap: 6 },
-  cardHeader: {
+  detailList: { gap: 10 },
+  detailCard: { padding: 14, gap: 10 },
+  detailHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     gap: 8,
   },
-  cardTitle: { fontSize: 15, fontWeight: "600", color: colors.ink, flex: 1 },
-  cardSubtitle: { fontSize: 12, color: colors.inkFaint, lineHeight: 17 },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 6,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.line,
-  },
-  infoLabel: { fontSize: 13, color: colors.inkSoft },
-  infoValue: { fontSize: 13, fontWeight: "600", color: colors.ink },
+  detailTitle: { fontSize: 15, fontWeight: "700", color: colors.ink, flex: 1 },
+  detailStatus: { fontSize: 12, fontWeight: "600" },
+  detailBlock: { flexDirection: "row", gap: 8 },
+  detailCell: { flex: 1, gap: 2 },
+  detailLabel: { fontSize: 11, color: colors.inkFaint },
+  detailValue: { fontSize: 13, fontWeight: "600", color: colors.ink },
+  detailMeta: { fontSize: 12, color: colors.inkSoft, lineHeight: 17 },
 });

@@ -21,6 +21,7 @@ const MENU: { route: keyof FeesStackParamList; title: string; subtitle: string; 
   { route: "FeePaymentLinks", title: "Fee Payment Links", subtitle: "Generate shareable payment links", icon: "link" },
   { route: "StudentFeeSummary", title: "Student Fee Summary", subtitle: "Outstanding balance per student", icon: "bar-chart-2" },
   { route: "PendingFees", title: "Pending Fees", subtitle: "Review dues across the school", icon: "alert-circle" },
+  { route: "PaymentSettings", title: "Payment Settings", subtitle: "Razorpay gateway credentials", icon: "settings" },
 ];
 
 export function FeesMenuScreen({ navigation }: Props) {

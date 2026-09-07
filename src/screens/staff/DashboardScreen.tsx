@@ -80,6 +80,7 @@ export function DashboardScreen({ navigation }: Props) {
     hasPermission(permissions, MODULES.TEACHING_STAFF, "read") ||
     hasPermission(permissions, MODULES.NON_TEACHING_STAFF, "read");
   const canReadFees = hasPermission(permissions, MODULES.FEES, "read");
+  const canReadTransport = hasPermission(permissions, MODULES.TRANSPORT, "read");
   const canMarkAttendance = hasPermission(permissions, MODULES.ATTENDANCE, "create");
   const canReadAttendance = hasPermission(permissions, MODULES.ATTENDANCE, "read");
   const canReadRoles = hasPermission(permissions, MODULES.ROLES, "read");
@@ -202,7 +203,7 @@ export function DashboardScreen({ navigation }: Props) {
               />
             )}
 
-            {(canReadStudents || canReadClasses || canReadFees || canMarkAttendance || canReadAttendance || canReadRoles) && (
+            {(canReadStudents || canReadClasses || canReadFees || canMarkAttendance || canReadAttendance || canReadRoles || canReadTransport) && (
               <View style={styles.sectionHeading}>
                 <Text style={styles.sectionTitle}>Quick access</Text>
                 <Text style={styles.sectionDescription}>Open the areas you manage most</Text>
@@ -250,6 +251,9 @@ export function DashboardScreen({ navigation }: Props) {
             )}
             {canReadFees && (
               <ModuleCard title="Fees" icon="credit-card" links={[{ title: "Pending fee summary", onPress: () => navigation.navigate("Fees", { screen: "FeesMenu" }) }]} />
+            )}
+            {canReadTransport && (
+              <ModuleCard title="Transport" icon="truck" links={[{ title: "Routes, vehicles & live tracking", onPress: () => navigation.navigate("More", { screen: "TransportRoutes" }) }]} />
             )}
           </View>
         )}
