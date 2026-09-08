@@ -27,25 +27,26 @@ interface StatCardProps {
   icon: keyof typeof Feather.glyphMap;
   tone?: StatTone;
   onPress?: () => void;
+  compact?: boolean;
 }
 
-export function StatCard({ label, value, sublabel, icon, tone = "gray", onPress }: StatCardProps) {
+export function StatCard({ label, value, sublabel, icon, tone = "gray", onPress, compact }: StatCardProps) {
   const Wrapper = onPress ? Pressable : View;
   return (
     <Wrapper
       {...(onPress ? { onPress: onPress as () => void } : null)}
-      style={({ pressed }) => [styles.card, onPress && pressed && styles.pressed]}
+      style={({ pressed }) => [styles.card, compact && styles.cardCompact, onPress && pressed && styles.pressed]}
     >
-      <View style={[styles.iconBox, { backgroundColor: TONE_BG[tone] }]}>
-        <Feather name={icon} size={20} color={TONE_FG[tone]} />
+      <View style={[styles.iconBox, compact && styles.iconBoxCompact, { backgroundColor: TONE_BG[tone] }]}>
+        <Feather name={icon} size={compact ? 16 : 20} color={TONE_FG[tone]} />
       </View>
       <View style={styles.textCol}>
-        <Text style={styles.value}>{value}</Text>
-        <Text style={styles.label} numberOfLines={1}>
+        <Text style={[styles.value, compact && styles.valueCompact]}>{value}</Text>
+        <Text style={[styles.label, compact && styles.labelCompact]} numberOfLines={1}>
           {label}
         </Text>
         {sublabel ? (
-          <Text style={styles.sublabel} numberOfLines={1}>
+          <Text style={[styles.sublabel, compact && styles.sublabelCompact]} numberOfLines={1}>
             {sublabel}
           </Text>
         ) : null}
@@ -72,6 +73,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
   },
+  cardCompact: {
+    gap: 10,
+    padding: 12,
+  },
   pressed: {
     opacity: 0.85,
   },
@@ -82,6 +87,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  iconBoxCompact: {
+    width: 36,
+    height: 36,
+    borderRadius: 6,
+  },
   textCol: {
     flexShrink: 1,
   },
@@ -90,14 +100,24 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: colors.ink,
   },
+  valueCompact: {
+    fontSize: 17,
+  },
   label: {
     fontSize: 13,
     fontWeight: "500",
     color: colors.inkSoft,
   },
+  labelCompact: {
+    fontSize: 11,
+  },
   sublabel: {
     marginTop: 2,
     fontSize: 11,
     color: colors.inkGhost,
+  },
+  sublabelCompact: {
+    marginTop: 1,
+    fontSize: 9,
   },
 });

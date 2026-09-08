@@ -140,3 +140,32 @@ export interface CreateComplaintPayload {
   category: string;
   description: string;
 }
+
+// hasTransportAssignment:false covers two distinct cases the backend
+// collapses into one shape — the student isn't on a transport route at all,
+// or the route has no vehicle assigned to it yet. `message` (when present)
+// distinguishes the latter for display.
+export interface ChildVehicleLocation {
+  hasTransportAssignment: boolean;
+  message?: string;
+  vehicle_number?: string;
+  routeName?: string | null;
+  driverName?: string | null;
+  driverPhone?: string | null;
+  is_trip_active?: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
+  recorded_at?: string | null;
+}
+
+// "online" = paid via Razorpay; "manual" = cash/cheque recorded by school
+// staff at the counter — the two payment tracks merged into one list.
+export interface PaymentHistoryItem {
+  id: string;
+  type: "online" | "manual";
+  receipt_no: string;
+  amount: number;
+  payment_mode: string;
+  payment_date: string;
+  fee_type: string | null;
+}

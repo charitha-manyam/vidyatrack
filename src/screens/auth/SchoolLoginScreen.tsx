@@ -49,7 +49,7 @@ export function SchoolLoginScreen({ navigation }: Props) {
     <Screen>
       <View>
         <Text style={styles.title}>School sign-in</Text>
-        <Text style={styles.subtitle}>For staff and parents — we'll text or email you a one-time code.</Text>
+        <Text style={styles.subtitle}>For staff, parents, and school admins — we'll text or email you a one-time code.</Text>
       </View>
 
       <Input label="School code" placeholder="" autoCapitalize="characters" value={schoolcode} onChangeText={setSchoolcode} />

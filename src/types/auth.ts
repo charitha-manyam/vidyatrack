@@ -17,6 +17,8 @@ export interface ParentInfo {
   id: string;
   father_name?: string | null;
   mother_name?: string | null;
+  father_phone?: string | null;
+  mother_phone?: string | null;
   father_email?: string | null;
   mother_email?: string | null;
 }

@@ -7,6 +7,7 @@ import { DataState } from "../../components/DataState";
 import { NeedChild } from "../../components/NeedChild";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Badge, type BadgeTone } from "../../components/ui/Badge";
+import { ParentChildSwitcher } from "../../components/ui/ParentChildSwitcher";
 import { useActiveChild } from "../../context/ChildContext";
 import { getChildHomework } from "../../api/parent.api";
 import { getErrorMessage } from "../../lib/errors";
@@ -63,6 +64,7 @@ export function ParentHomeworkScreen({ }: Props) {
 
   return (
     <Screen>
+      <ParentChildSwitcher />
       <PageHeader title="Homework" description={activeChild.name} />
       <DataState
         loading={loading}

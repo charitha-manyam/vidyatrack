@@ -8,6 +8,8 @@ import { DataState } from "../../components/DataState";
 import { ListRow } from "../../components/ListRow";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { StatCard } from "../../components/ui/StatCard";
+import { TrackMyBusCard } from "../../components/ui/TrackMyBusCard";
+import { ParentChildSwitcher } from "../../components/ui/ParentChildSwitcher";
 import { useAuth } from "../../context/AuthContext";
 import { useActiveChild } from "../../context/ChildContext";
 import {
@@ -109,22 +111,17 @@ export function ParentHomeScreen({ navigation }: Props) {
     <Screen
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load(true)} tintColor="#3525cd" />}
     >
+      <ParentChildSwitcher />
       <PageHeader
         title={`Hi${activeChild ? `, ${activeChild.name.split(" ")[0]}'s family` : ""}`}
         description={todayLabel()}
-        actions={
-          activeChild ? (
-            <Text style={styles.childChip} onPress={() => navigation.navigate("More", { screen: "Children" })}>
-              {activeChild.name.split(" ")[0]} · switch
-            </Text>
-          ) : null
-        }
       />
 
       <DataState loading={loading || childLoading} error={error ?? childError} retry={() => load()}>
         <View style={styles.content}>
           <View style={styles.grid}>
             <StatCard
+              compact
               label="Pending fees"
               value={fees ? `₹${fees.summary.totalDue.toLocaleString("en-IN")}` : "—"}
               icon="credit-card"
@@ -132,6 +129,7 @@ export function ParentHomeScreen({ navigation }: Props) {
               onPress={() => navigation.navigate("Fees")}
             />
             <StatCard
+              compact
               label="Attendance this month"
               value={attendancePct != null ? `${attendancePct}%` : "—"}
               icon="check-circle"
@@ -141,6 +139,7 @@ export function ParentHomeScreen({ navigation }: Props) {
           </View>
           <View style={styles.grid}>
             <StatCard
+              compact
               label="Homework due"
               value={homeworkDue}
               icon="book-open"
@@ -148,6 +147,7 @@ export function ParentHomeScreen({ navigation }: Props) {
               onPress={() => navigation.navigate("Homework")}
             />
             <StatCard
+              compact
               label="Next holiday"
               value={nextHoliday ? nextHoliday.holidayname : "None"}
               sublabel={nextHoliday?.date}
@@ -181,9 +181,12 @@ export function ParentHomeScreen({ navigation }: Props) {
             )}
           </View>
 
+          <TrackMyBusCard onPress={() => navigation.navigate("More", { screen: "TrackMyBus" })} />
+
           <View style={styles.linksCard}>
             <ListRow title="Marks & Results" chevron onPress={() => navigation.navigate("More", { screen: "Marks" })} />
             <ListRow title="Timetable" chevron onPress={() => navigation.navigate("More", { screen: "Timetable" })} />
+            <ListRow title="Payment History" chevron onPress={() => navigation.navigate("More", { screen: "PaymentHistory" })} />
           </View>
         </View>
       </DataState>
@@ -250,11 +253,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 8,
     gap: 4,
-  },
-  childChip: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#3525cd",
   },
   emptyText: {
     fontSize: 14,

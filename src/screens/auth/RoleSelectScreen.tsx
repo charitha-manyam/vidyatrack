@@ -1,41 +1,47 @@
 import { StyleSheet, Text, View, Pressable, Image } from "react-native";
+import { Feather } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../navigation/types";
 import { colors } from "../../theme/colors";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "RoleSelect">;
 
-const ROLES: { title: string; subtitle: string; screen: keyof AuthStackParamList }[] = [
-  { title: "School", subtitle: "Staff or parent sign-in", screen: "SchoolLogin" },
-  { title: "Marketing rep", subtitle: "Field sales sign-in", screen: "MarketingLogin" },
-  { title: "Platform", subtitle: "Super admin sign-in", screen: "SuperAdminLogin" },
-];
-
-// The single entry point every user type shares — "based on the login,
-// after usertype" starts here: pick how you sign in, and everything past
-// this point (the actual login form, then the home screen and tabs) is
-// chosen by what the backend says you are.
+// One sign-in for everyone: the same school-code + OTP flow serves staff,
+// parents, and school admins. The backend resolves which portal the user
+// belongs to (RBAC) after the code is verified — no role pickers at login.
 export function RoleSelectScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
-      <View style={styles.brandMark}>
-        <Image source={require("../../../assets/android-icon-foreground.png")} style={styles.brandLogo} resizeMode="contain" />
+      <View style={styles.brand}>
+        <View style={styles.brandMark}>
+          <Image source={require("../../../assets/android-icon-foreground.png")} style={styles.brandLogo} resizeMode="contain" />
+        </View>
+        <Text style={styles.appName}>VidyaTrack</Text>
+        <Text style={styles.tagline}>Every school day, one record.</Text>
+        <View style={styles.chips}>
+          {["Staff", "Parents", "School admins"].map((chip) => (
+            <View key={chip} style={styles.chip}>
+              <Text style={styles.chipText}>{chip}</Text>
+            </View>
+          ))}
+        </View>
       </View>
-      <Text style={styles.title}>VidyaTrack</Text>
-      <Text style={styles.subtitle}>One record. Three rooms. Every school day.</Text>
 
-      <View style={styles.roles}>
-        {ROLES.map((role) => (
-          <Pressable
-            key={role.screen}
-            style={({ pressed }) => [styles.roleCard, pressed && styles.roleCardPressed]}
-            onPress={() => navigation.navigate(role.screen as any)}
-          >
-            <Text style={styles.roleTitle}>{role.title}</Text>
-            <Text style={styles.roleSubtitle}>{role.subtitle}</Text>
-          </Pressable>
-        ))}
-      </View>
+      <Pressable
+        style={({ pressed }) => [styles.loginCard, pressed && styles.loginCardPressed]}
+        onPress={() => navigation.navigate("SchoolLogin")}
+      >
+        <View style={styles.loginIcon}>
+          <Feather name="log-in" size={20} color={colors.brand600} />
+        </View>
+        <View style={styles.loginText}>
+          <Text style={styles.loginTitle}>School sign-in</Text>
+          <Text style={styles.loginSubtitle}>School code · email or phone</Text>
+        </View>
+        <Feather name="chevron-right" size={20} color={colors.inkGhost} />
+      </Pressable>
+
+      <Text style={styles.hint}>One-time code sent by email or SMS.</Text>
     </View>
   );
 }
@@ -47,57 +53,95 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 24,
-    gap: 8,
+  },
+  brand: {
+    alignItems: "center",
+    marginBottom: 40,
   },
   brandMark: {
-    width: 72,
-    height: 72,
-    borderRadius: 20,
-    backgroundColor: "transparent",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
+    width: 76,
+    height: 76,
+    borderRadius: 22,
     overflow: "hidden",
+    marginBottom: 14,
   },
   brandLogo: {
-    width: 72,
-    height: 72,
-    borderRadius: 20,
+    width: 76,
+    height: 76,
+    borderRadius: 22,
     backgroundColor: "transparent",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
+  appName: {
+    fontSize: 26,
+    fontWeight: "800",
     color: colors.ink,
+    letterSpacing: 0.2,
   },
-  subtitle: {
+  tagline: {
     fontSize: 14,
     color: colors.inkFaint,
-    marginBottom: 24,
-    textAlign: "center",
+    marginTop: 4,
   },
-  roles: {
-    width: "100%",
+  chips: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 14,
+  },
+  chip: {
+    borderRadius: 999,
+    backgroundColor: colors.surfaceMuted,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+  chipText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: colors.inkSoft,
+  },
+  loginCard: {
+    alignSelf: "stretch",
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
-  },
-  roleCard: {
     backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 16,
-    padding: 18,
+    borderColor: colors.lineStrong,
+    borderRadius: 18,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
   },
-  roleCardPressed: {
+  loginCardPressed: {
     backgroundColor: colors.paperRaised,
   },
-  roleTitle: {
+  loginIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: colors.brand100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loginText: {
+    flex: 1,
+  },
+  loginTitle: {
     fontSize: 16,
     fontWeight: "700",
     color: colors.ink,
   },
-  roleSubtitle: {
+  loginSubtitle: {
     fontSize: 13,
     color: colors.inkFaint,
     marginTop: 2,
+  },
+  hint: {
+    marginTop: 18,
+    fontSize: 12,
+    color: colors.inkFaint,
+    textAlign: "center",
   },
 });

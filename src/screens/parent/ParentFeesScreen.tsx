@@ -6,6 +6,7 @@ import { Screen } from "../../components/Screen";
 import { DataState } from "../../components/DataState";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Badge, type BadgeTone } from "../../components/ui/Badge";
+import { ParentChildSwitcher } from "../../components/ui/ParentChildSwitcher";
 import { useActiveChild } from "../../context/ChildContext";
 import { getChildFeeSummary } from "../../api/parent.api";
 import { getErrorMessage } from "../../lib/errors";
@@ -60,6 +61,7 @@ export function ParentFeesScreen({ }: Props) {
 
   return (
     <Screen>
+      <ParentChildSwitcher />
       <PageHeader
         title={`${activeChild.name}'s fees`}
         description="Tuition and transport combined."

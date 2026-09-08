@@ -17,7 +17,7 @@ export function Screen({ children, scroll = true, refreshControl, topInset = tru
     <SafeAreaView style={styles.safe} edges={topInset ? ["top", "bottom"] : ["bottom"]}>
       <Wrapper
         style={styles.wrapper}
-        contentContainerStyle={scroll ? [styles.content, !refreshControl && styles.grow] : undefined}
+        contentContainerStyle={scroll ? [styles.content, styles.grow] : undefined}
         {...(scroll ? { refreshControl } : {})}
       >
         {children}

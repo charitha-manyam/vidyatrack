@@ -8,6 +8,7 @@ import { NeedChild } from "../../components/NeedChild";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Badge, type BadgeTone } from "../../components/ui/Badge";
 import { DonutBreakdownCard } from "../../components/ui/DonutBreakdownCard";
+import { ParentChildSwitcher } from "../../components/ui/ParentChildSwitcher";
 import { useActiveChild } from "../../context/ChildContext";
 import { getChildMonthlyAttendance } from "../../api/parent.api";
 import { getErrorMessage } from "../../lib/errors";
@@ -81,6 +82,7 @@ export function ParentAttendanceScreen({ }: Props) {
 
   return (
     <Screen>
+      <ParentChildSwitcher />
       <PageHeader title="Attendance" description={activeChild.name} />
 
       <View style={styles.monthRow}>

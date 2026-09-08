@@ -84,7 +84,10 @@ export type ParentMoreStackParamList = {
   Announcements: undefined;
   Marks: undefined;
   Timetable: undefined;
+  PaymentHistory: undefined;
+  TrackMyBus: undefined;
   Complaints: undefined;
+  Profile: undefined;
 };
 
 export type ParentTabParamList = {
@@ -93,7 +96,6 @@ export type ParentTabParamList = {
   Attendance: undefined;
   Homework: undefined;
   More: NavigatorScreenParams<ParentMoreStackParamList>;
-  Profile: undefined;
 };
 
 export type FeesStackParamList = {
@@ -125,4 +127,20 @@ export type StaffTabParamList = {
   Classes: NavigatorScreenParams<ClassesStackParamList>;
   Staff: NavigatorScreenParams<StaffStackParamList>;
   More: NavigatorScreenParams<MoreStackParamList>;
+};
+
+export type SuperAdminMoreStackParamList = {
+  SuperAdminMoreMenu: undefined;
+  Schools: undefined;
+  Subscriptions: undefined;
+  BillingPlans: undefined;
+  SubscriptionPayments: undefined;
+  PromoCodes: undefined;
+  PricingPlans: undefined;
+  Profile: undefined;
+};
+
+export type SuperAdminTabParamList = {
+  Dashboard: undefined;
+  More: NavigatorScreenParams<SuperAdminMoreStackParamList>;
 };
