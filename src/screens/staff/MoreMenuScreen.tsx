@@ -42,7 +42,9 @@ export function MoreMenuScreen({ navigation }: Props) {
         if (dest.screen === "ModulePlaceholder") {
           navigation.navigate("ModulePlaceholder", { title: item.label });
         } else {
-          navigation.navigate(dest.screen);
+          // All MoreScreen destinations are paramless; the union is wider than
+          // navigate's per-route overloads accept, so cast past the check.
+          navigation.navigate(dest.screen as never);
         }
         break;
       case "resource":

@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { Screen } from "../components/Screen";
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
@@ -7,9 +8,13 @@ import { colors } from "../theme/colors";
 
 // One Profile screen shared by every usertype's tab navigator — the actual
 // identity fields shown just branch on session.type, same pattern as
-// everywhere else in this app.
+// everywhere else in this app. When the screen is pushed onto a stack whose
+// navigator already renders a native header (staff "More" menu), we skip
+// Screen's top safe-area inset to avoid a big empty gap under the header.
 export function ProfileScreen() {
   const { session, logout } = useAuth();
+  const navigation = useNavigation();
+  const hasNativeHeader = navigation.canGoBack();
   if (!session) return null;
 
   const rows: { label: string; value: string }[] = (() => {
@@ -40,7 +45,7 @@ export function ProfileScreen() {
   })();
 
   return (
-    <Screen>
+    <Screen topInset={!hasNativeHeader}>
       <Text style={styles.title}>Profile</Text>
       <Card style={styles.card}>
         {rows.map((row) => (

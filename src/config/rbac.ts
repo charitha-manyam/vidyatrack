@@ -108,7 +108,20 @@ export type MoreScreen =
   | "Vehicles"
   | "VehicleAssignments"
   | "LiveTracking"
-  | "TransportFees";
+  | "TransportFees"
+  | "Reports"
+  | "AccountantReports"
+  | "StudyMaterials"
+  | "Announcements"
+  | "Complaints"
+  | "Holidays"
+  | "Admissions"
+  | "ConfirmAdmissions"
+  | "Homeworks"
+  | "Marks"
+  | "Exams"
+  | "ExamsTimetable"
+  | "Timetable";
 
 const DESTINATION_MAP: Record<string, MobileDestination> = {
   "/classes": { kind: "classesList" },
@@ -122,11 +135,11 @@ const DESTINATION_MAP: Record<string, MobileDestination> = {
   "/fees/summary": { kind: "fees", screen: "StudentFeeSummary" },
   "/subjects": { kind: "resource", resourceId: "subjects" },
   "/school-working-days": { kind: "resource", resourceId: "school-working-days" },
-  "/timetable": { kind: "resource", resourceId: "timetable" },
-  "/exams": { kind: "resource", resourceId: "exams" },
-  "/exams-timetable": { kind: "resource", resourceId: "exams-timetable" },
-  "/marks": { kind: "resource", resourceId: "marks" },
-  "/homework": { kind: "resource", resourceId: "homework" },
+  "/timetable": { kind: "more", screen: "Timetable" },
+  "/exams": { kind: "more", screen: "Exams" },
+  "/exams-timetable": { kind: "more", screen: "ExamsTimetable" },
+  "/marks": { kind: "more", screen: "Marks" },
+  "/homework": { kind: "more", screen: "Homeworks" },
   "/departments": { kind: "resource", resourceId: "departments" },
   "/designations": { kind: "resource", resourceId: "designations" },
   "/leaves": { kind: "more", screen: "Leaves" },
@@ -146,6 +159,14 @@ const DESTINATION_MAP: Record<string, MobileDestination> = {
   "/transport/vehicle-assignments": { kind: "more", screen: "VehicleAssignments" },
   "/transport/live-tracking": { kind: "more", screen: "LiveTracking" },
   "/transport/fees": { kind: "more", screen: "TransportFees" },
+  "/reports": { kind: "more", screen: "Reports" },
+  "/reports/accountant": { kind: "more", screen: "AccountantReports" },
+  "/study-materials": { kind: "more", screen: "StudyMaterials" },
+  "/announcements": { kind: "more", screen: "Announcements" },
+  "/complaints": { kind: "more", screen: "Complaints" },
+  "/holidays": { kind: "more", screen: "Holidays" },
+  "/admissions": { kind: "more", screen: "Admissions" },
+  "/confirm-admissions": { kind: "more", screen: "ConfirmAdmissions" },
 };
 
 export function resolveMobileDestination(path: string): MobileDestination {

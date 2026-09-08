@@ -29,6 +29,7 @@ export type ClassesStackParamList = {
 
 export type MoreStackParamList = {
   MoreMenu: undefined;
+  Fees: NavigatorScreenParams<FeesStackParamList>;
   Roles: undefined;
   RoleForm: { roleId?: string } | undefined;
   AcademicYears: undefined;
@@ -59,6 +60,21 @@ export type MoreStackParamList = {
   TransportFees: undefined;
   TransportFeeForm: { transportFeeId?: string } | undefined;
   LiveTracking: undefined;
+  Reports: undefined;
+  AccountantReports: undefined;
+  StudyMaterials: undefined;
+  Announcements: undefined;
+  Complaints: undefined;
+  Holidays: undefined;
+  Admissions: undefined;
+  ConfirmAdmissions: undefined;
+  Homeworks: undefined;
+  HomeworkForm: { homeworkId?: string; title?: string } | undefined;
+  HomeworkSubmissions: { homeworkId: string; title: string };
+  Marks: undefined;
+  Exams: undefined;
+  ExamsTimetable: undefined;
+  Timetable: undefined;
 };
 
 export type ParentMoreStackParamList = {
@@ -98,10 +114,15 @@ export type FeesStackParamList = {
   PaymentSettings: undefined;
 };
 
+export type StaffStackParamList = {
+  StaffDirectory: undefined;
+  StaffForm: { staffId?: string } | undefined;
+};
+
 export type StaffTabParamList = {
   Home: undefined;
   Students: NavigatorScreenParams<StudentsStackParamList>;
   Classes: NavigatorScreenParams<ClassesStackParamList>;
-  Fees: NavigatorScreenParams<FeesStackParamList>;
+  Staff: NavigatorScreenParams<StaffStackParamList>;
   More: NavigatorScreenParams<MoreStackParamList>;
 };

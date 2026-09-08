@@ -1,4 +1,4 @@
-﻿import { useCallback, useMemo, useState } from "react";
+﻿import { useCallback, useEffect, useState } from "react";
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -6,18 +6,20 @@ import { PageHeader } from "../../components/ui/PageHeader";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Screen } from "../../components/Screen";
 import { DataState } from "../../components/DataState";
-import { SearchBar } from "../../components/SearchBar";
+import { InlineSelect, type SelectOption } from "../../components/InlineSelect";
 import { Button } from "../../components/Button";
 import { PermissionGate, staffPermissions } from "../../components/PermissionGate";
 import { useAuth } from "../../context/AuthContext";
 import { hasPermission, MODULES } from "../../config/rbac";
-import { deleteStudent, getStudents } from "../../api/school.api";
+import { deleteStudent, getClasses, getStudents, type StudentListParams } from "../../api/school.api";
 import { getErrorMessage } from "../../lib/errors";
 import { colors } from "../../theme/colors";
 import type { StudentsStackParamList } from "../../navigation/types";
 import type { Student } from "../../types/school";
 
 type Props = NativeStackScreenProps<StudentsStackParamList, "StudentsList">;
+
+const ALL_CLASSES: SelectOption = { value: "", label: "All Classes" };
 
 export function StudentsScreen({ navigation }: Props) {
   const { session } = useAuth();
@@ -31,18 +33,29 @@ export function StudentsScreen({ navigation }: Props) {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
+  const [classFilter, setClassFilter] = useState("");
+  const [classes, setClasses] = useState<SelectOption[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      setStudents(await getStudents());
+      const params: StudentListParams = {};
+      if (classFilter) params.class_id = classFilter;
+      setStudents(await getStudents(params));
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
+  }, [classFilter]);
+
+  useEffect(() => {
+    if (classes.length) return;
+    getClasses()
+      .then((rows) => setClasses(rows.map((c) => ({ value: c.id, label: c.class_name }))))
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useFocusEffect(
@@ -69,17 +82,6 @@ export function StudentsScreen({ navigation }: Props) {
     ]);
   };
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return students;
-    return students.filter((s) =>
-      [`${s.first_name} ${s.last_name ?? ""}`, s.roll_number, s.admission_number ?? "", s.className ?? ""]
-        .join(" ")
-        .toLowerCase()
-        .includes(q)
-    );
-  }, [students, search]);
-
   return (
     <PermissionGate module={MODULES.STUDENTS} action="read">
       <Screen scroll={false}>
@@ -93,11 +95,17 @@ export function StudentsScreen({ navigation }: Props) {
               ) : null
             }
           />
-        <SearchBar value={search} onChangeText={setSearch} placeholder="Search name, roll number, or class" />
-        <DataState loading={loading} error={error} retry={load} empty={filtered.length === 0 ? "No students found." : null}>
+        <InlineSelect
+          label="Filter by class"
+          value={classFilter}
+          options={[ALL_CLASSES, ...classes]}
+          onSelect={setClassFilter}
+          placeholder="All Classes"
+        />
+        <DataState loading={loading} error={error} retry={load} empty={students.length === 0 ? "No students found." : null}>
           <FlatList
             contentContainerStyle={styles.listContent}
-            data={filtered}
+            data={students}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <View style={styles.card}>

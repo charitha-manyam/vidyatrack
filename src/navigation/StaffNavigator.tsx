@@ -47,6 +47,21 @@ import { AcademicYearPromotionScreen } from "../screens/staff/AcademicYearPromot
 import { ModulePlaceholderScreen } from "../screens/staff/ModulePlaceholderScreen";
 import { ResourceListScreen } from "../screens/staff/ResourceListScreen";
 import { ResourceFormScreen } from "../screens/staff/ResourceFormScreen";
+import { ReportsScreen } from "../screens/staff/ReportsScreen";
+import { AccountantReportsScreen } from "../screens/staff/AccountantReportsScreen";
+import { StudyMaterialsScreen } from "../screens/staff/StudyMaterialsScreen";
+import { AnnouncementsScreen } from "../screens/staff/AnnouncementsScreen";
+import { ComplaintsScreen } from "../screens/staff/ComplaintsScreen";
+import { HolidaysScreen } from "../screens/staff/HolidaysScreen";
+import { AdmissionsScreen } from "../screens/staff/AdmissionsScreen";
+import { ConfirmAdmissionsScreen } from "../screens/staff/ConfirmAdmissionsScreen";
+import { HomeworksScreen } from "../screens/staff/HomeworksScreen";
+import { HomeworkFormScreen } from "../screens/staff/HomeworkFormScreen";
+import { HomeworkSubmissionsScreen } from "../screens/staff/HomeworkSubmissionsScreen";
+import { MarksScreen } from "../screens/staff/MarksScreen";
+import { ExamsScreen } from "../screens/staff/ExamsScreen";
+import { ExamsTimetableScreen } from "../screens/staff/ExamsTimetableScreen";
+import { TimetableScreen } from "../screens/staff/TimetableScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { useAuth } from "../context/AuthContext";
 import { hasPermission, MODULES } from "../config/rbac";
@@ -56,6 +71,7 @@ import type {
   ClassesStackParamList,
   FeesStackParamList,
   MoreStackParamList,
+  StaffStackParamList,
   StaffTabParamList,
   StudentsStackParamList,
 } from "./types";
@@ -64,6 +80,7 @@ const Tab = createBottomTabNavigator<StaffTabParamList>();
 const StudentsStack = createNativeStackNavigator<StudentsStackParamList>();
 const ClassesStack = createNativeStackNavigator<ClassesStackParamList>();
 const FeesStack = createNativeStackNavigator<FeesStackParamList>();
+const StaffStack = createNativeStackNavigator<StaffStackParamList>();
 const MoreStack = createNativeStackNavigator<MoreStackParamList>();
 
 const headerOptions = {
@@ -129,10 +146,20 @@ function FeesNavigator() {
   );
 }
 
+function StaffNavigatorStack() {
+  return (
+    <StaffStack.Navigator screenOptions={{ headerShown: true, ...headerOptions }}>
+      <StaffStack.Screen name="StaffDirectory" component={StaffDirectoryScreen} options={{ title: "Staff" }} />
+      <StaffStack.Screen name="StaffForm" component={StaffFormScreen} options={{ title: "Add staff member" }} />
+    </StaffStack.Navigator>
+  );
+}
+
 function MoreNavigator() {
   return (
     <MoreStack.Navigator screenOptions={{ headerShown: true, ...headerOptions }}>
       <MoreStack.Screen name="MoreMenu" component={MoreMenuScreen} options={{ headerShown: false }} />
+      <MoreStack.Screen name="Fees" component={FeesNavigator} options={{ headerShown: false }} />
       <MoreStack.Screen name="Roles" component={RolesScreen} options={{ title: "Roles & Permissions" }} />
       <MoreStack.Screen
         name="RoleForm"
@@ -189,6 +216,21 @@ function MoreNavigator() {
       <MoreStack.Screen name="TransportFees" component={TransportFeesScreen} options={{ title: "Transport Fees" }} />
       <MoreStack.Screen name="TransportFeeForm" component={TransportFeeFormScreen} options={{ title: "Transport fee" }} />
       <MoreStack.Screen name="LiveTracking" component={LiveTrackingScreen} options={{ title: "Live Tracking" }} />
+      <MoreStack.Screen name="Reports" component={ReportsScreen} options={{ title: "Reports" }} />
+      <MoreStack.Screen name="AccountantReports" component={AccountantReportsScreen} options={{ title: "Accountant Reports" }} />
+      <MoreStack.Screen name="StudyMaterials" component={StudyMaterialsScreen} options={{ title: "Study Materials" }} />
+      <MoreStack.Screen name="Announcements" component={AnnouncementsScreen} options={{ title: "Announcements" }} />
+      <MoreStack.Screen name="Complaints" component={ComplaintsScreen} options={{ title: "Complaints" }} />
+      <MoreStack.Screen name="Holidays" component={HolidaysScreen} options={{ title: "Holidays" }} />
+      <MoreStack.Screen name="Admissions" component={AdmissionsScreen} options={{ title: "Admissions" }} />
+      <MoreStack.Screen name="ConfirmAdmissions" component={ConfirmAdmissionsScreen} options={{ title: "Confirmed Admissions" }} />
+      <MoreStack.Screen name="Homeworks" component={HomeworksScreen} options={{ title: "Homework" }} />
+      <MoreStack.Screen name="HomeworkForm" component={HomeworkFormScreen} options={{ title: "Assign homework" }} />
+      <MoreStack.Screen name="HomeworkSubmissions" component={HomeworkSubmissionsScreen} options={{ title: "Homework submissions" }} />
+      <MoreStack.Screen name="Marks" component={MarksScreen} options={{ title: "Marks" }} />
+      <MoreStack.Screen name="Exams" component={ExamsScreen} options={{ title: "Exams" }} />
+      <MoreStack.Screen name="ExamsTimetable" component={ExamsTimetableScreen} options={{ title: "Exams Timetable" }} />
+      <MoreStack.Screen name="Timetable" component={TimetableScreen} options={{ title: "Timetable" }} />
     </MoreStack.Navigator>
   );
 }
@@ -201,7 +243,9 @@ export function StaffNavigator() {
 
   const canReadStudents = hasPermission(permissions, MODULES.STUDENTS, "read");
   const canReadClasses = hasPermission(permissions, MODULES.CLASSES, "read");
-  const canReadFees = hasPermission(permissions, MODULES.FEES, "read");
+  const canReadStaff =
+    hasPermission(permissions, MODULES.TEACHING_STAFF, "read") ||
+    hasPermission(permissions, MODULES.NON_TEACHING_STAFF, "read");
 
   return (
     <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveTintColor: colors.brand600 }}>
@@ -224,11 +268,11 @@ export function StaffNavigator() {
           options={{ tabBarIcon: ({ color, size }) => <Feather name="book-open" color={color} size={size} /> }}
         />
       ) : null}
-      {canReadFees ? (
+      {canReadStaff ? (
         <Tab.Screen
-          name="Fees"
-          component={FeesNavigator}
-          options={{ tabBarIcon: ({ color, size }) => <Feather name="credit-card" color={color} size={size} /> }}
+          name="Staff"
+          component={StaffNavigatorStack}
+          options={{ tabBarIcon: ({ color, size }) => <Feather name="user-check" color={color} size={size} /> }}
         />
       ) : null}
       <Tab.Screen

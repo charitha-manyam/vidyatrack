@@ -595,16 +595,6 @@ export const RESOURCES: Record<string, ResourceConfig> = {
     fields: [],
   },
 
-  "study-materials": {
-    id: "study-materials",
-    title: "Study Materials",
-    description: "Shared study material",
-    module: "Study Materials",
-    listPath: "/tenant/getallstudymaterials",
-    deletePath: (id) => `/tenant/deletestudymaterial/${id}`,
-    fields: [],
-  },
-
   announcements: {
     id: "announcements",
     title: "Announcements",
